@@ -1,6 +1,99 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# OurCabin - React Native App
 
-# Getting Started
+This is a [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Node.js >= 20
+- React Native development environment set up
+- iOS: Xcode and CocoaPods
+- Android: Android Studio and Android SDK
+
+### Environment Setup
+
+1. **Clone the repository**
+   ```bash
+   git clone <your-private-repo-url>
+   cd OurCabin
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
+
+3. **Set up environment variables**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your actual configuration values
+   ```
+
+4. **iOS Setup (if targeting iOS)**
+   ```bash
+   cd ios
+   bundle install
+   bundle exec pod install
+   cd ..
+   ```
+
+5. **Start the development server**
+   ```bash
+   npm start
+   # or
+   yarn start
+   ```
+
+## 🏗️ Development
+
+### Running the App
+
+#### Android
+```bash
+npm run android
+# or
+yarn android
+```
+
+#### iOS
+```bash
+npm run ios
+# or
+yarn ios
+```
+
+### Code Quality
+
+```bash
+# Linting
+npm run lint
+
+# Testing
+npm test
+```
+
+## 📁 Project Structure
+
+```
+src/
+├── components/     # Reusable UI components
+├── screens/        # Screen components
+├── services/       # API services and business logic
+├── core/           # Core utilities and types
+└── assets/         # Images, fonts, etc.
+```
+
+## 🔐 Security Notes
+
+- Never commit `.env` files or sensitive configuration
+- Use `.env.example` as a template for required environment variables
+- API keys and secrets should be managed through environment variables
+- Review `.gitignore` to ensure sensitive files are excluded
+
+## 🚀 Getting Started
 
 > **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
 

@@ -1,0 +1,52 @@
+---
+description: >-
+  Coding preferences and best practices for the "Our Cabin" React Native
+  project. This guide is tailored for a stack using Supabase as the backend.
+globs:
+  - "**/*.{ts,tsx}"
+alwaysApply: true
+---
+
+# 1. General Philosophy
+# Inspired by the principles of simplicity, clarity, and avoiding duplication.
+
+- **Simplicity First:** Always prefer simple, readable solutions over complex or clever ones. If a piece of code requires a long explanation, it's a candidate for refactoring.
+- **DRY (Don't Repeat Yourself):** Before writing new logic, check for existing services, hooks, or components that provide similar functionality. Re-use and abstract whenever possible.
+- **Clean & Organized:** Keep the codebase tidy. Remove dead code (commented-out blocks, unused variables/imports) before committing. Follow the established directory structure.
+
+# 2. Code Structure & Organization
+
+- **Single Responsibility Principle:** Components, functions, and services should have one primary responsibility.
+- **File Size:** Actively refactor components and files that grow beyond **250 lines of code**. This is a strong indicator that a file is doing too much and should be broken down.
+- **Directory Structure:** Adhere strictly to the defined project structure. For example:
+  - `src/components/`: Only for reusable, generic UI components (e.g., `Button.tsx`, `Card.tsx`).
+  - `src/screens/`: For top-level screen components, which compose smaller components.
+  - `src/core/services/`: For data service interfaces (e.g., `ICabinApiService.ts`).
+  - `src/services/`: For concrete implementations (e.g., `SupabaseService.ts`).
+
+# 3. React & React Native Specifics
+
+- **Functional Components & Hooks:** All new components must be functional components using React Hooks. Avoid class components.
+- **TypeScript is Mandatory:** All props, state, and function signatures must be strongly typed. Use Supabase's generated types to ensure your client-side models match the database schema.
+- **Props Destructuring:** Destructure props in the function signature for clarity and to easily identify a component's dependencies.
+- **Consistent UI Library:** Utilize components from the chosen UI library (e.g., React Native Paper) whenever possible to maintain visual consistency. Only create custom components when the library doesn't meet the need.
+
+# 4. API Layer & Repository Pattern (Supabase)
+# This is critical for our architecture to remain backend-agnostic and secure.
+
+- **Abstract All Data Calls:** UI components **must never** interact directly with the Supabase client. All data fetching, mutations, and subscriptions must go through the defined `ICabinApiService`.
+- **Interface-Driven:** The UI layer should only be aware of the `ICabinApiService` interface, not the concrete `SupabaseService` implementation. This ensures our ability to swap the backend in the future.
+- **Utilize Row Level Security (RLS):** All Supabase queries from the client must be written with the assumption that RLS is enabled. The service layer should not contain logic that tries to filter data that should have been filtered by RLS policies in the database.
+
+# 5. Environment & Configuration
+# To ensure stability and prevent cross-environment issues.
+
+- **Environment-Aware Code:** Use environment variables to manage your Supabase URL and `anon` key. Create separate Supabase projects for `dev` and `prod` and manage keys accordingly.
+- **NEVER Commit Secret Keys:** Your Supabase `service_role` key or any other secrets must never be committed to version control.
+- **NEVER Overwrite .env:** The `.env` file is a local, untracked file. Never commit it or overwrite a teammate's file without explicit confirmation. All required variables should be documented in a committed `.env.example` file.
+
+# 6. Testing
+# To ensure code quality and prevent regressions.
+
+- **Mock the Service Layer:** When testing components, mock the `ICabinApiService` implementation. This allows you to test your UI in various states (loading, error, success) without making actual database calls.
+- **NO Mocking in Dev/Prod:** Never add stubbing, fake data patterns, or mock implementations to code that affects the `dev` or `prod` environments. The `dev` environment should always connect to the actual development Supabase project.
