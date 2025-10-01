@@ -54,13 +54,45 @@ export const TasksScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 12 },
-  composer: { flexDirection: 'row', gap: 8, marginBottom: 12, alignItems: 'center' },
-  input: { flex: 1, borderWidth: 1, borderColor: '#ddd', borderRadius: 8, padding: 8 },
-  list: { gap: 8 },
-  task: { padding: 12, borderRadius: 8, backgroundColor: '#f7fbff', borderWidth: 1, borderColor: '#e5f0ff' },
-  taskTitle: { fontSize: 16 },
-  meta: { fontSize: 12, color: '#666', marginTop: 6 },
+  container: { flex: 1, padding: 16, backgroundColor: '#f8f9fa' },
+  composer: { 
+    flexDirection: 'row', 
+    gap: 12, 
+    marginBottom: 16, 
+    alignItems: 'center',
+    backgroundColor: 'white',
+    padding: 12,
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  input: { 
+    flex: 1, 
+    borderWidth: 1, 
+    borderColor: '#e9ecef', 
+    borderRadius: 8, 
+    padding: 12,
+    fontSize: 16,
+    backgroundColor: '#f8f9fa',
+  },
+  list: { gap: 12 },
+  task: { 
+    padding: 16, 
+    borderRadius: 12, 
+    backgroundColor: 'white', 
+    borderWidth: 1, 
+    borderColor: '#e9ecef',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  taskTitle: { fontSize: 16, fontWeight: '600', color: '#2c3e50' },
+  meta: { fontSize: 12, color: '#6c757d', marginTop: 8, fontWeight: '500' },
 });
 
 
