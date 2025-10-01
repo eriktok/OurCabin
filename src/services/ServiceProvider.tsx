@@ -1,11 +1,14 @@
 import React, { createContext, useContext, useMemo } from 'react';
 import { ICabinApiService } from '../core/services/ICabinApiService';
 import { cabinApiService } from './SupabaseService';
+import { realSupabaseService } from './RealSupabaseService';
 
 const CabinApiContext = createContext<ICabinApiService | null>(null);
 
 export const ServiceProvider: React.FC<{ children: React.ReactNode; service?: ICabinApiService }> = ({ children, service }) => {
-  const value = useMemo(() => service ?? cabinApiService, [service]);
+  // Use real Supabase service if environment variables are set, otherwise use mock
+  const useRealService = process.env.SUPABASE_URL && process.env.SUPABASE_URL !== 'your-supabase-url';
+  const value = useMemo(() => service ?? (useRealService ? realSupabaseService : cabinApiService), [service, useRealService]);
   return <CabinApiContext.Provider value={value}>{children}</CabinApiContext.Provider>;
 };
 

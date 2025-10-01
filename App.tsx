@@ -19,7 +19,11 @@ import { ServiceProvider } from './src/services/ServiceProvider';
 import { AuthScreen } from './src/screens/AuthScreen';
 import { CabinGateScreen } from './src/screens/CabinGateScreen';
 import { CabinSettingsScreen } from './src/screens/CabinSettingsScreen';
+import { UserProfileScreen } from './src/screens/UserProfileScreen';
 import { useCabinApi } from './src/services/ServiceProvider';
+import { useAppStore } from './src/stores/appStore';
+import { NotificationService } from './src/services/NotificationService';
+import { useEffect } from 'react';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
@@ -35,9 +39,15 @@ function App() {
 function AppContent() {
   const safeAreaInsets = useSafeAreaInsets();
   const [hasOnboarded, setHasOnboarded] = useState<boolean>(true);
-  const [tab, setTab] = useState<'logbook' | 'tasks' | 'calendar' | 'cabin'>('logbook');
+  const [tab, setTab] = useState<'logbook' | 'tasks' | 'calendar' | 'cabin' | 'profile'>('logbook');
   const [userId, setUserId] = useState<string | null>(null);
   const [cabinId, setCabinId] = useState<string | null>(null);
+  const { currentUser, setCurrentUser, setSelectedCabin } = useAppStore();
+
+  // Initialize notifications
+  useEffect(() => {
+    NotificationService.initialize();
+  }, []);
 
   if (!hasOnboarded) {
     return (
@@ -50,7 +60,10 @@ function AppContent() {
   if (!userId) {
     return (
       <ServiceProvider>
-        <AuthScreen onSignedIn={() => setUserId('demo')} />
+        <AuthScreen onSignedIn={() => {
+          setUserId('demo');
+          setCurrentUser({ id: 'demo', displayName: 'Demo User' });
+        }} />
       </ServiceProvider>
     );
   }
@@ -58,7 +71,13 @@ function AppContent() {
   if (!cabinId) {
     return (
       <ServiceProvider>
-        <CabinGateScreen userId={userId} onCabinSelected={(c) => setCabinId(c.id)} />
+        <CabinGateScreen 
+          userId={userId} 
+          onCabinSelected={(cabin) => {
+            setCabinId(cabin.id);
+            setSelectedCabin(cabin);
+          }} 
+        />
       </ServiceProvider>
     );
   }
@@ -70,13 +89,19 @@ function AppContent() {
           {tab === 'logbook' && <LogbookScreen />}
           {tab === 'tasks' && <TasksScreen />}
           {tab === 'calendar' && <CalendarScreen />}
-          {tab === 'cabin' && <CabinSettingsScreen cabinId={cabinId!} onSignOut={() => setUserId(null)} />}
+          {tab === 'cabin' && <CabinSettingsScreen cabinId={cabinId!} onSignOut={() => {
+            setUserId(null);
+            setCurrentUser(null);
+            setSelectedCabin(null);
+          }} />}
+          {tab === 'profile' && <UserProfileScreen />}
         </View>
         <View style={[styles.tabBar, { paddingBottom: safeAreaInsets.bottom }] }>
           <TabButton label="Logbook" active={tab === 'logbook'} onPress={() => setTab('logbook')} />
           <TabButton label="Tasks" active={tab === 'tasks'} onPress={() => setTab('tasks')} />
           <TabButton label="Calendar" active={tab === 'calendar'} onPress={() => setTab('calendar')} />
           <TabButton label="Cabin" active={tab === 'cabin'} onPress={() => setTab('cabin')} />
+          <TabButton label="Profile" active={tab === 'profile'} onPress={() => setTab('profile')} />
         </View>
       </View>
     </ServiceProvider>

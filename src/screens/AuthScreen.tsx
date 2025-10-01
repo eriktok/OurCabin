@@ -32,9 +32,32 @@ export const AuthScreen: React.FC<Props> = ({ onSignedIn }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 16 },
-  title: { fontSize: 24, fontWeight: '700', marginBottom: 16 },
-  actions: { width: '70%', marginVertical: 6 },
+  container: { 
+    flex: 1, 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    padding: 24,
+    backgroundColor: '#f8f9fa',
+  },
+  title: { 
+    fontSize: 32, 
+    fontWeight: '700', 
+    marginBottom: 24,
+    color: '#2c3e50',
+    textAlign: 'center',
+  },
+  actions: { 
+    width: '80%', 
+    marginVertical: 8,
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
 });
 
 

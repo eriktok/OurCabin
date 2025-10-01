@@ -57,14 +57,35 @@ export const CalendarScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 12 },
-  title: { fontSize: 18, fontWeight: '600', marginBottom: 12 },
-  list: { gap: 8 },
-  booking: { padding: 12, borderRadius: 8, backgroundColor: '#fff9f3', borderWidth: 1, borderColor: '#ffedd5' },
-  range: { fontSize: 16 },
-  meta: { fontSize: 12, color: '#666', marginTop: 6 },
-  status: { fontSize: 12, color: '#444', marginTop: 6 },
-  row: { marginBottom: 12 },
+  container: { flex: 1, padding: 16, backgroundColor: '#f8f9fa' },
+  title: { fontSize: 24, fontWeight: '700', marginBottom: 20, color: '#2c3e50' },
+  list: { gap: 12 },
+  booking: { 
+    padding: 16, 
+    borderRadius: 12, 
+    backgroundColor: 'white', 
+    borderWidth: 1, 
+    borderColor: '#e9ecef',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  range: { fontSize: 16, fontWeight: '600', color: '#2c3e50' },
+  meta: { fontSize: 12, color: '#6c757d', marginTop: 8, fontWeight: '500' },
+  status: { fontSize: 12, color: '#495057', marginTop: 8, fontWeight: '600' },
+  row: { 
+    marginBottom: 16,
+    backgroundColor: 'white',
+    padding: 12,
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
 });
 
 

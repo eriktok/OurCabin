@@ -1,72 +1,114 @@
-# OurCabin - React Native App
+# 🏡 OurCabin - Shared Cabin Management App
 
-This is a [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+A React Native app for families and groups who co-own cabins. Simplify communication, scheduling, and property management with a single, organized hub.
+
+## ✨ Features
+
+### 🔐 Authentication
+- Google Sign-In integration
+- Vipps authentication (Norway)
+- Secure user session management
+
+### 🏠 Cabin Management
+- Create and join private cabin spaces
+- Generate secure invitation codes
+- Admin role assignment for cabin creators
+
+### 📝 Logbook (Social Feed)
+- Share text posts and photos
+- Like posts and add comments
+- Image upload from camera/gallery
+- Chronological feed with newest first
+
+### ✅ Task Management
+- Create and assign tasks
+- Track status (To Do → In Progress → Done)
+- Collaborative task lists
+- Mark tasks as complete
+
+### 📅 Booking Calendar
+- Request cabin stays
+- Admin approval workflow
+- View availability and conflicts
+- Status tracking (pending/approved)
+
+### ⚙️ Cabin Settings
+- Generate invite codes
+- Manage cabin members
+- Sign out functionality
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
 - Node.js >= 20
-- React Native development environment set up
+- React Native development environment
 - iOS: Xcode and CocoaPods
 - Android: Android Studio and Android SDK
 
-### Environment Setup
+### Installation
 
-1. **Clone the repository**
+1. **Clone and install**
    ```bash
-   git clone <your-private-repo-url>
+   git clone <your-repo-url>
    cd OurCabin
-   ```
-
-2. **Install dependencies**
-   ```bash
    npm install
-   # or
-   yarn install
    ```
 
-3. **Set up environment variables**
+2. **Environment setup**
    ```bash
    cp .env.example .env
-   # Edit .env with your actual configuration values
+   # Edit .env with your Supabase credentials (optional)
    ```
 
-4. **iOS Setup (if targeting iOS)**
+3. **iOS setup**
    ```bash
-   cd ios
-   bundle install
-   bundle exec pod install
-   cd ..
+   cd ios && bundle install && bundle exec pod install && cd ..
    ```
 
-5. **Start the development server**
+4. **Run the app**
    ```bash
    npm start
-   # or
-   yarn start
+   npm run ios    # or npm run android
    ```
 
-## 🏗️ Development
+## 🏗️ Architecture
 
-### Running the App
+### Repository Pattern
+- **Interface-driven**: `ICabinApiService` abstracts data operations
+- **Backend-agnostic**: Easy to swap Supabase for other backends
+- **Type-safe**: Full TypeScript implementation
 
-#### Android
-```bash
-npm run android
-# or
-yarn android
+### Project Structure
+```
+src/
+├── core/
+│   ├── models/           # TypeScript interfaces
+│   └── services/         # Service contracts
+├── services/
+│   ├── SupabaseService.ts    # Mock implementation
+│   ├── RealSupabaseService.ts # Production Supabase
+│   └── ServiceProvider.tsx   # Context provider
+├── screens/              # Screen components
+├── components/           # Reusable UI components
+└── config/              # Configuration files
 ```
 
-#### iOS
+## 🔧 Development
+
+### Running the App
 ```bash
+# Start Metro bundler
+npm start
+
+# Run on iOS
 npm run ios
-# or
-yarn ios
+
+# Run on Android  
+npm run android
 ```
 
 ### Code Quality
-
 ```bash
 # Linting
 npm run lint
@@ -75,116 +117,93 @@ npm run lint
 npm test
 ```
 
-## 📁 Project Structure
+## 🗄️ Backend Setup
 
-```
-src/
-├── components/     # Reusable UI components
-├── screens/        # Screen components
-├── services/       # API services and business logic
-├── core/           # Core utilities and types
-└── assets/         # Images, fonts, etc.
-```
+### Option 1: Mock Data (Default)
+The app works out-of-the-box with mock data. No setup required!
 
-## 🔐 Security Notes
+### Option 2: Real Supabase Backend
+For production use, follow the [Supabase Setup Guide](./SUPABASE_SETUP.md):
 
-- Never commit `.env` files or sensitive configuration
-- Use `.env.example` as a template for required environment variables
-- API keys and secrets should be managed through environment variables
-- Review `.gitignore` to ensure sensitive files are excluded
+1. Create Supabase project
+2. Run database schema
+3. Configure environment variables
+4. Set up authentication providers
 
-## 🚀 Getting Started
+## 🔐 Security
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+- **Environment Variables**: Never commit `.env` files
+- **Row Level Security**: Supabase RLS policies protect data
+- **Authentication**: Secure OAuth flows
+- **Invite Codes**: Time-limited, single-use codes
 
-## Step 1: Start Metro
+## 📱 Screenshots
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+The app features a modern, clean interface with:
+- Tab-based navigation
+- Card-based layouts with shadows
+- Image upload and preview
+- Status indicators and toggles
+- Responsive design
 
-To start the Metro dev server, run the following command from the root of your React Native project:
-
-```sh
-# Using npm
-npm start
-
-# OR using Yarn
-yarn start
-```
-
-## Step 2: Build and run your app
-
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
-
-### Android
-
-```sh
-# Using npm
-npm run android
-
-# OR using Yarn
-yarn android
-```
+## 🚀 Deployment
 
 ### iOS
+1. Configure signing in Xcode
+2. Build and archive
+3. Upload to App Store Connect
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+### Android
+1. Generate signed APK/AAB
+2. Upload to Google Play Console
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+## 🤝 Contributing
 
-```sh
-bundle install
+1. Follow the established architecture patterns
+2. Use TypeScript for all new code
+3. Test on both iOS and Android
+4. Update documentation for new features
+
+## 📄 License
+
+Private project - All rights reserved
+
+## 🛠️ Troubleshooting
+
+### Common Issues
+
+**Metro bundler issues:**
+```bash
+npx react-native start --reset-cache
 ```
 
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
+**iOS build issues:**
+```bash
+cd ios && bundle exec pod install && cd ..
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
+**Android build issues:**
+```bash
+cd android && ./gradlew clean && cd ..
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+### Development Tips
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+- Use React Native Debugger for debugging
+- Enable Fast Refresh for hot reloading
+- Test on both iOS and Android devices
+- Use TypeScript for better development experience
 
-## Step 3: Modify your app
+## 📚 Learn More
 
-Now that you have successfully run the app, let's make changes!
+- [React Native Documentation](https://reactnative.dev/docs/getting-started)
+- [Supabase Documentation](https://supabase.com/docs)
+- [React Native Image Picker](https://github.com/react-native-image-picker/react-native-image-picker)
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+## 🎯 Next Steps
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+1. **Set up Supabase backend** for production use
+2. **Add push notifications** for task updates and bookings
+3. **Implement offline support** with local data caching
+4. **Add user profiles** and cabin member management
+5. **Deploy to app stores** for distribution
