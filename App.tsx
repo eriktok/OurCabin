@@ -23,7 +23,9 @@ import { UserProfileScreen } from './src/screens/UserProfileScreen';
 import { useAppStore } from './src/stores/appStore';
 import { NotificationService } from './src/services/NotificationService';
 import { useEffect } from 'react';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { SafeIcon } from './src/components/ui/SafeIcon';
+import { Toast } from './src/components/ui/Toast';
+import { useToast } from './src/hooks/useToast';
 import { getTheme } from './src/theme/paperTheme';
 
 function App() {
@@ -47,6 +49,7 @@ function AppContent() {
   const [userId, setUserId] = useState<string | null>(null);
   const [cabinId, setCabinId] = useState<string | null>(null);
   const { setCurrentUser, setSelectedCabin } = useAppStore();
+  const { toast, hideToast } = useToast();
 
   useEffect(() => {
     NotificationService.initialize();
@@ -106,6 +109,13 @@ function AppContent() {
           <TabButton label="Cabin" icon="home-outline" active={tab === 'cabin'} onPress={() => setTab('cabin')} />
           <TabButton label="Profile" icon="account-circle" active={tab === 'profile'} onPress={() => setTab('profile')} />
         </View>
+        
+        <Toast
+          visible={toast.visible}
+          message={toast.message}
+          type={toast.type}
+          onHide={hideToast}
+        />
       </View>
     </ServiceProvider>
   );
@@ -114,7 +124,7 @@ function AppContent() {
 function TabButton({ label, icon, active, onPress }: { label: string; icon: string; active: boolean; onPress: () => void }) {
   return (
     <TouchableOpacity onPress={onPress} style={[styles.tabButton, active && styles.tabButtonActive]}>
-      <Icon name={icon} size={20} color={active ? '#2E7D32' : '#666'} />
+      <SafeIcon name={icon} size={20} color={active ? '#2E7D32' : '#666'} />
       <Text style={[styles.tabLabel, active && styles.tabLabelActive]}>{label}</Text>
     </TouchableOpacity>
   );
