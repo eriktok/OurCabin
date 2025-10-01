@@ -1,5 +1,5 @@
 import { ICabinApiService } from '../core/services/ICabinApiService';
-import { Booking, Cabin, Post, Task, User } from '../core/models';
+import { Booking, Cabin, Comment, Post, Task, User } from '../core/models';
 
 export class SupabaseService implements ICabinApiService {
   // Auth (stubs)
@@ -42,6 +42,22 @@ export class SupabaseService implements ICabinApiService {
       authorId: 'demo',
       text: postData.text,
       imageUrls: postData.imageUrls,
+      createdAt: new Date().toISOString(),
+      likes: 0,
+    };
+  }
+  async likePost(postId: string): Promise<void> {
+    return;
+  }
+  async getComments(postId: string): Promise<Comment[]> {
+    return [];
+  }
+  async addComment(postId: string, text: string): Promise<Comment> {
+    return {
+      id: Math.random().toString(36).slice(2),
+      postId,
+      authorId: 'demo',
+      text,
       createdAt: new Date().toISOString(),
     };
   }
@@ -88,8 +104,23 @@ export class SupabaseService implements ICabinApiService {
         startDate: start.toISOString(),
         endDate: end.toISOString(),
         createdAt: today.toISOString(),
+        status: 'approved',
       },
     ];
+  }
+  async requestBooking(cabinId: string, range: { startDate: string; endDate: string }): Promise<Booking> {
+    return {
+      id: Math.random().toString(36).slice(2),
+      cabinId,
+      userId: 'demo',
+      startDate: range.startDate,
+      endDate: range.endDate,
+      createdAt: new Date().toISOString(),
+      status: 'pending',
+    };
+  }
+  async approveBooking(bookingId: string): Promise<void> {
+    return;
   }
 
   // Cabins (stubs)

@@ -20,6 +20,7 @@ export interface Post {
   text: string;
   imageUrls?: string[];
   createdAt: string;
+  likes?: number;
 }
 
 export interface Task {
@@ -38,6 +39,15 @@ export interface Booking {
   userId: Identifier;
   startDate: string; // ISO date
   endDate: string;   // ISO date
+  createdAt: string;
+  status?: 'pending' | 'approved';
+}
+
+export interface Comment {
+  id: Identifier;
+  postId: Identifier;
+  authorId: Identifier;
+  text: string;
   createdAt: string;
 }
 

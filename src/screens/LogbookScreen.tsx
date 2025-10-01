@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TextInput, Button, StyleSheet } from 'react-native';
+import { View, Text, FlatList, TextInput, Button, StyleSheet, TouchableOpacity } from 'react-native';
 import { Post } from '../core/models';
 import { useCabinApi } from '../services/ServiceProvider';
 
@@ -37,6 +37,17 @@ export const LogbookScreen: React.FC = () => {
           <View style={styles.post}>
             <Text style={styles.postText}>{item.text}</Text>
             <Text style={styles.meta}>{new Date(item.createdAt).toLocaleString()}</Text>
+            <View style={styles.row}>
+              <TouchableOpacity
+                onPress={async () => {
+                  await api.likePost(item.id);
+                  setPosts((prev) => prev.map((p) => (p.id === item.id ? { ...p, likes: (p.likes ?? 0) + 1 } : p)));
+                }}
+                style={styles.likeBtn}
+              >
+                <Text>❤️ {item.likes ?? 0}</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         )}
         contentContainerStyle={styles.list}
@@ -53,6 +64,8 @@ const styles = StyleSheet.create({
   post: { padding: 12, borderRadius: 8, backgroundColor: '#fafafa', borderWidth: 1, borderColor: '#eee' },
   postText: { fontSize: 16 },
   meta: { fontSize: 12, color: '#666', marginTop: 6 },
+  row: { flexDirection: 'row', justifyContent: 'flex-start', marginTop: 8 },
+  likeBtn: { paddingVertical: 6, paddingHorizontal: 10, borderWidth: 1, borderColor: '#ddd', borderRadius: 16 },
 });
 
 

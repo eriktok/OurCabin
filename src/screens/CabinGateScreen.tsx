@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, StyleSheet, TextInput, FlatList } from 'react-native';
+import { View, Text, Button, StyleSheet, TextInput, FlatList, Alert } from 'react-native';
 import { useCabinApi } from '../services/ServiceProvider';
 import { Cabin } from '../core/models';
 
@@ -56,6 +56,19 @@ export const CabinGateScreen: React.FC<Props> = ({ userId, onCabinSelected }) =>
         <TextInput style={styles.input} placeholder="Invite code" value={invite} onChangeText={setInvite} />
         <Button title="Join" onPress={join} />
       </View>
+
+      {cabins[0] && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Invite others</Text>
+          <Button
+            title="Generate invite code for first cabin"
+            onPress={async () => {
+              const code = await api.generateInviteCode(cabins[0].id);
+              Alert.alert('Invite Code', code);
+            }}
+          />
+        </View>
+      )}
     </View>
   );
 };
