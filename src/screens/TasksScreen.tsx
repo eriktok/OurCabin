@@ -84,8 +84,8 @@ export const TasksScreen: React.FC = () => {
       const task = await api.createTask('demo-cabin', { 
         title: newTask.title,
         priority: newTask.priority,
-        dueDate: newTask.dueDate,
-        assignedTo: newTask.assignedTo,
+        dueDate: newTask.dueDate?.toISOString(),
+        assignedTo: newTask.assignedTo || undefined,
       });
       setTasks(prev => [task, ...prev]);
       

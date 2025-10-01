@@ -80,6 +80,7 @@ export class RealSupabaseService implements ICabinApiService {
       id: post.id,
       cabinId: post.cabin_id,
       authorId: post.author_id,
+      authorName: post.author_name || 'Unknown',
       text: post.text,
       imageUrls: post.image_urls,
       createdAt: post.created_at,
@@ -109,6 +110,7 @@ export class RealSupabaseService implements ICabinApiService {
       id: data.id,
       cabinId: data.cabin_id,
       authorId: data.author_id,
+      authorName: data.author_name || 'Unknown',
       text: data.text,
       imageUrls: data.image_urls,
       createdAt: data.created_at,
@@ -134,7 +136,9 @@ export class RealSupabaseService implements ICabinApiService {
       id: comment.id,
       postId: comment.post_id,
       authorId: comment.author_id,
+      authorName: comment.author_name || 'Unknown',
       text: comment.text,
+      content: comment.text,
       createdAt: comment.created_at,
     }));
   }
@@ -159,7 +163,9 @@ export class RealSupabaseService implements ICabinApiService {
       id: data.id,
       postId: data.post_id,
       authorId: data.author_id,
+      authorName: data.author_name || 'Unknown',
       text: data.text,
+      content: data.text,
       createdAt: data.created_at,
     };
   }
@@ -375,7 +381,7 @@ export class RealSupabaseService implements ICabinApiService {
 
     return {
       cabinId: data.cabin_id,
-      cabinName: data.cabins.name,
+      cabinName: (data.cabins as any)?.name || 'Unknown',
       expiresAt: data.expires_at,
     };
   }
@@ -420,53 +426,7 @@ export class RealSupabaseService implements ICabinApiService {
     }));
   }
 
-  async createCabin(name: string): Promise<Cabin> {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('Not authenticated');
 
-    const { data, error } = await supabase
-      .from('cabins')
-      .insert({
-        name,
-        created_by: user.id,
-      })
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    return {
-      id: data.id,
-      name: data.name,
-      photoUrl: data.photo_url,
-    };
-  }
-
-  async joinCabin(inviteCode: string): Promise<Cabin> {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('Not authenticated');
-
-    // Get invite code details
-    const inviteDetails = await this.getInviteCodeDetails(inviteCode);
-    if (!inviteDetails) throw new Error('Invalid or expired invite code');
-
-    // Add user to cabin (this would need a cabin_members table)
-    const { error } = await supabase
-      .from('cabin_members')
-      .insert({
-        cabin_id: inviteDetails.cabinId,
-        user_id: user.id,
-        role: 'member',
-      });
-
-    if (error) throw error;
-
-    return {
-      id: inviteDetails.cabinId,
-      name: inviteDetails.cabinName,
-      photoUrl: null,
-    };
-  }
 
   async createComment(postId: string, text: string): Promise<Comment> {
     const { data: { user } } = await supabase.auth.getUser();
@@ -488,9 +448,20 @@ export class RealSupabaseService implements ICabinApiService {
       id: data.id,
       postId: data.post_id,
       authorId: data.author_id,
+      authorName: data.author_name || 'Unknown',
       text: data.text,
+      content: data.text,
       createdAt: data.created_at,
     };
+  }
+
+  async assignTask(taskId: string, userId: string): Promise<void> {
+    const { error } = await supabase
+      .from('tasks')
+      .update({ assigned_to: userId })
+      .eq('id', taskId);
+    
+    if (error) throw error;
   }
 }
 

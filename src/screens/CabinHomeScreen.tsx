@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Image, Dimensions } from 'react-native';
-import { Card } from '../components/ui/Card';
+import { Card } from '../components/ui/iOSCard';
+import { Button } from '../components/ui/iOSButton';
 import { AppHeader } from '../components/ui/AppHeader';
 import { PrimaryButton } from '../components/ui/PrimaryButton';
 import { SafeIcon } from '../components/ui/SafeIcon';
-import { DesignSystem } from '../theme/designSystem';
+import { iOSDesignSystem } from '../theme/iOSDesignSystem';
+import { iOSList, iOSListItem } from '../components/ui/iOSList';
 import { useCabinApi } from '../services/ServiceProvider';
 import { useAppStore } from '../stores/appStore';
 import { format } from 'date-fns';
@@ -49,7 +51,7 @@ export const CabinHomeScreen: React.FC = () => {
       
       // Load cabin statistics
       const [posts, tasks, bookings] = await Promise.all([
-        api.getPosts('demo-cabin'),
+        api.getPosts('demo-cabin', 10),
         api.getTasks('demo-cabin'),
         api.getBookings('demo-cabin'),
       ]);
@@ -127,10 +129,10 @@ export const CabinHomeScreen: React.FC = () => {
 
     const getEventColor = (type: string) => {
       switch (type) {
-        case 'booking': return DesignSystem.colors.primary[500];
-        case 'task': return DesignSystem.colors.warning;
-        case 'post': return DesignSystem.colors.info;
-        default: return DesignSystem.colors.neutral[500];
+        case 'booking': return iOSDesignSystem.colors.primary;
+        case 'task': return iOSDesignSystem.colors.warning;
+        case 'post': return iOSDesignSystem.colors.info;
+        default: return iOSDesignSystem.colors.neutral[500];
       }
     };
 
@@ -182,7 +184,7 @@ export const CabinHomeScreen: React.FC = () => {
               </Text>
             </View>
             <View style={styles.welcomeImage}>
-              <SafeIcon name="home-heart" size={48} color={DesignSystem.colors.primary[500]} />
+              <SafeIcon name="home-heart" size={48} color={iOSDesignSystem.colors.primary[500]} />
             </View>
           </View>
         </Card>
@@ -193,25 +195,25 @@ export const CabinHomeScreen: React.FC = () => {
             title="Posts"
             value={stats.totalPosts}
             icon="post"
-            color={DesignSystem.colors.primary[500]}
+            color={iOSDesignSystem.colors.primary}
           />
           <StatCard
             title="Active Tasks"
             value={stats.activeTasks}
             icon="check-circle"
-            color={DesignSystem.colors.warning}
+            color={iOSDesignSystem.colors.warning}
           />
           <StatCard
             title="Upcoming Bookings"
             value={stats.upcomingBookings}
             icon="calendar-check"
-            color={DesignSystem.colors.info}
+            color={iOSDesignSystem.colors.info}
           />
           <StatCard
             title="Family Members"
             value={stats.familyMembers}
             icon="account-group"
-            color={DesignSystem.colors.secondary[500]}
+            color={iOSDesignSystem.colors.secondary}
           />
         </View>
 
@@ -220,19 +222,19 @@ export const CabinHomeScreen: React.FC = () => {
           <Text style={styles.sectionTitle}>Quick Actions</Text>
           <View style={styles.quickActionsGrid}>
             <TouchableOpacity style={styles.quickAction}>
-              <SafeIcon name="plus-circle" size={24} color={DesignSystem.colors.primary[500]} />
+              <SafeIcon name="plus-circle" size={24} color={iOSDesignSystem.colors.primary[500]} />
               <Text style={styles.quickActionText}>New Post</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.quickAction}>
-              <SafeIcon name="check-circle" size={24} color={DesignSystem.colors.warning} />
+              <SafeIcon name="check-circle" size={24} color={iOSDesignSystem.colors.warning} />
               <Text style={styles.quickActionText}>Add Task</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.quickAction}>
-              <SafeIcon name="calendar-plus" size={24} color={DesignSystem.colors.info} />
+              <SafeIcon name="calendar-plus" size={24} color={iOSDesignSystem.colors.info} />
               <Text style={styles.quickActionText}>Book Stay</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.quickAction}>
-              <SafeIcon name="account-plus" size={24} color={DesignSystem.colors.secondary[500]} />
+              <SafeIcon name="account-plus" size={24} color={iOSDesignSystem.colors.secondary[500]} />
               <Text style={styles.quickActionText}>Invite Family</Text>
             </TouchableOpacity>
           </View>
@@ -259,7 +261,7 @@ export const CabinHomeScreen: React.FC = () => {
           <View style={styles.familyFeatures}>
             <TouchableOpacity style={styles.familyFeature}>
               <View style={styles.familyFeatureIcon}>
-                <SafeIcon name="account-group" size={24} color={DesignSystem.colors.primary[500]} />
+                <SafeIcon name="account-group" size={24} color={iOSDesignSystem.colors.primary[500]} />
               </View>
               <View style={styles.familyFeatureContent}>
                 <Text style={styles.familyFeatureTitle}>Invite Family Members</Text>
@@ -267,12 +269,12 @@ export const CabinHomeScreen: React.FC = () => {
                   Share your cabin with family and friends
                 </Text>
               </View>
-              <SafeIcon name="chevron-right" size={20} color={DesignSystem.colors.neutral[400]} />
+              <SafeIcon name="chevron-right" size={20} color={iOSDesignSystem.colors.neutral[400]} />
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.familyFeature}>
               <View style={styles.familyFeatureIcon}>
-                <SafeIcon name="calendar-multiple" size={24} color={DesignSystem.colors.info} />
+                <SafeIcon name="calendar-multiple" size={24} color={iOSDesignSystem.colors.info} />
               </View>
               <View style={styles.familyFeatureContent}>
                 <Text style={styles.familyFeatureTitle}>Family Calendar</Text>
@@ -280,12 +282,12 @@ export const CabinHomeScreen: React.FC = () => {
                   Coordinate visits and special events
                 </Text>
               </View>
-              <SafeIcon name="chevron-right" size={20} color={DesignSystem.colors.neutral[400]} />
+              <SafeIcon name="chevron-right" size={20} color={iOSDesignSystem.colors.neutral[400]} />
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.familyFeature}>
               <View style={styles.familyFeatureIcon}>
-                <SafeIcon name="heart" size={24} color={DesignSystem.colors.error} />
+                <SafeIcon name="heart" size={24} color={iOSDesignSystem.colors.error} />
               </View>
               <View style={styles.familyFeatureContent}>
                 <Text style={styles.familyFeatureTitle}>Family Memories</Text>
@@ -293,12 +295,12 @@ export const CabinHomeScreen: React.FC = () => {
                   Share photos and create lasting memories
                 </Text>
               </View>
-              <SafeIcon name="chevron-right" size={20} color={DesignSystem.colors.neutral[400]} />
+              <SafeIcon name="chevron-right" size={20} color={iOSDesignSystem.colors.neutral[400]} />
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.familyFeature}>
               <View style={styles.familyFeatureIcon}>
-                <SafeIcon name="shield-check" size={24} color={DesignSystem.colors.success} />
+                <SafeIcon name="shield-check" size={24} color={iOSDesignSystem.colors.success} />
               </View>
               <View style={styles.familyFeatureContent}>
                 <Text style={styles.familyFeatureTitle}>Cabin Rules</Text>
@@ -306,7 +308,7 @@ export const CabinHomeScreen: React.FC = () => {
                   Set and share cabin guidelines
                 </Text>
               </View>
-              <SafeIcon name="chevron-right" size={20} color={DesignSystem.colors.neutral[400]} />
+              <SafeIcon name="chevron-right" size={20} color={iOSDesignSystem.colors.neutral[400]} />
             </TouchableOpacity>
           </View>
         </Card>
@@ -323,7 +325,7 @@ export const CabinHomeScreen: React.FC = () => {
             {recentPosts.map((post, index) => (
               <View key={index} style={styles.activityItem}>
                 <View style={styles.activityIcon}>
-                  <SafeIcon name="post" size={16} color={DesignSystem.colors.primary[500]} />
+                  <SafeIcon name="post" size={16} color={iOSDesignSystem.colors.primary[500]} />
                 </View>
                 <View style={styles.activityContent}>
                   <Text style={styles.activityTitle}>{post.title}</Text>
@@ -343,7 +345,7 @@ export const CabinHomeScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: DesignSystem.colors.background.secondary,
+    backgroundColor: iOSDesignSystem.colors.background.secondary,
   },
   loadingContainer: {
     flex: 1,
@@ -352,13 +354,13 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: DesignSystem.spacing.md,
+    padding: iOSDesignSystem.spacing.md,
   },
   welcomeCard: {
-    marginBottom: DesignSystem.spacing.lg,
-    backgroundColor: DesignSystem.colors.primary[50],
+    marginBottom: iOSDesignSystem.spacing.lg,
+    backgroundColor: iOSDesignSystem.colors.primary[50],
     borderLeftWidth: 4,
-    borderLeftColor: DesignSystem.colors.primary[500],
+    borderLeftColor: iOSDesignSystem.colors.primary[500],
   },
   welcomeContent: {
     flexDirection: 'row',
@@ -369,203 +371,203 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   welcomeTitle: {
-    fontSize: DesignSystem.typography.fontSize.xl,
-    fontWeight: DesignSystem.typography.fontWeight.bold,
-    color: DesignSystem.colors.text.primary,
-    marginBottom: DesignSystem.spacing.xs,
+    fontSize: iOSDesignSystem.typography.fontSize.xl,
+    fontWeight: iOSDesignSystem.typography.fontWeight.bold as any,
+    color: iOSDesignSystem.colors.text.primary,
+    marginBottom: iOSDesignSystem.spacing.xs,
   },
   welcomeSubtitle: {
-    fontSize: DesignSystem.typography.fontSize.base,
-    color: DesignSystem.colors.text.secondary,
-    lineHeight: DesignSystem.typography.lineHeight.relaxed,
+    fontSize: iOSDesignSystem.typography.fontSize.base,
+    color: iOSDesignSystem.colors.text.secondary,
+    lineHeight: iOSDesignSystem.typography.lineHeight.relaxed,
   },
   welcomeImage: {
-    marginLeft: DesignSystem.spacing.md,
+    marginLeft: iOSDesignSystem.spacing.md,
   },
   statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginBottom: DesignSystem.spacing.lg,
-    gap: DesignSystem.spacing.sm,
+    marginBottom: iOSDesignSystem.spacing.lg,
+    gap: iOSDesignSystem.spacing.sm,
   },
   statCard: {
     flex: 1,
-    minWidth: (width - DesignSystem.spacing.md * 3) / 2,
-    backgroundColor: DesignSystem.colors.surface.primary,
-    borderRadius: DesignSystem.borderRadius.lg,
-    padding: DesignSystem.spacing.md,
+    minWidth: (width - iOSDesignSystem.spacing.md * 3) / 2,
+    backgroundColor: iOSDesignSystem.colors.surface.primary,
+    borderRadius: iOSDesignSystem.borderRadius.lg,
+    padding: iOSDesignSystem.spacing.md,
     borderLeftWidth: 4,
-    ...DesignSystem.shadows.sm,
+    ...iOSDesignSystem.shadows.sm,
   },
   statContent: {
     alignItems: 'center',
   },
   statValue: {
-    fontSize: DesignSystem.typography.fontSize['2xl'],
-    fontWeight: DesignSystem.typography.fontWeight.bold,
-    color: DesignSystem.colors.text.primary,
-    marginTop: DesignSystem.spacing.xs,
+    fontSize: iOSDesignSystem.typography.fontSize['2xl'],
+    fontWeight: iOSDesignSystem.typography.fontWeight.bold as any,
+    color: iOSDesignSystem.colors.text.primary,
+    marginTop: iOSDesignSystem.spacing.xs,
   },
   statTitle: {
-    fontSize: DesignSystem.typography.fontSize.sm,
-    color: DesignSystem.colors.text.secondary,
-    marginTop: DesignSystem.spacing.xs,
+    fontSize: iOSDesignSystem.typography.fontSize.sm,
+    color: iOSDesignSystem.colors.text.secondary,
+    marginTop: iOSDesignSystem.spacing.xs,
     textAlign: 'center',
   },
   quickActionsCard: {
-    marginBottom: DesignSystem.spacing.lg,
+    marginBottom: iOSDesignSystem.spacing.lg,
   },
   sectionTitle: {
-    fontSize: DesignSystem.typography.fontSize.lg,
-    fontWeight: DesignSystem.typography.fontWeight.semibold,
-    color: DesignSystem.colors.text.primary,
-    marginBottom: DesignSystem.spacing.md,
+    fontSize: iOSDesignSystem.typography.fontSize.lg,
+    fontWeight: iOSDesignSystem.typography.fontWeight.semibold as any,
+    color: iOSDesignSystem.colors.text.primary,
+    marginBottom: iOSDesignSystem.spacing.md,
   },
   quickActionsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: DesignSystem.spacing.sm,
+    gap: iOSDesignSystem.spacing.sm,
   },
   quickAction: {
     flex: 1,
-    minWidth: (width - DesignSystem.spacing.md * 3) / 2,
+    minWidth: (width - iOSDesignSystem.spacing.md * 3) / 2,
     alignItems: 'center',
-    padding: DesignSystem.spacing.md,
-    backgroundColor: DesignSystem.colors.background.tertiary,
-    borderRadius: DesignSystem.borderRadius.md,
+    padding: iOSDesignSystem.spacing.md,
+    backgroundColor: iOSDesignSystem.colors.background.tertiary,
+    borderRadius: iOSDesignSystem.borderRadius.md,
     borderWidth: 1,
-    borderColor: DesignSystem.colors.neutral[200],
+    borderColor: iOSDesignSystem.colors.neutral[200],
   },
   quickActionText: {
-    fontSize: DesignSystem.typography.fontSize.sm,
-    color: DesignSystem.colors.text.primary,
-    marginTop: DesignSystem.spacing.xs,
+    fontSize: iOSDesignSystem.typography.fontSize.sm,
+    color: iOSDesignSystem.colors.text.primary,
+    marginTop: iOSDesignSystem.spacing.xs,
     textAlign: 'center',
   },
   eventsCard: {
-    marginBottom: DesignSystem.spacing.lg,
+    marginBottom: iOSDesignSystem.spacing.lg,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: DesignSystem.spacing.md,
+    marginBottom: iOSDesignSystem.spacing.md,
   },
   seeAllText: {
-    fontSize: DesignSystem.typography.fontSize.sm,
-    color: DesignSystem.colors.primary[500],
-    fontWeight: DesignSystem.typography.fontWeight.medium,
+    fontSize: iOSDesignSystem.typography.fontSize.sm,
+    color: iOSDesignSystem.colors.primary[500],
+    fontWeight: iOSDesignSystem.typography.fontWeight.medium as any,
   },
   eventsList: {
-    gap: DesignSystem.spacing.sm,
+    gap: iOSDesignSystem.spacing.sm,
   },
   eventCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: DesignSystem.spacing.md,
-    backgroundColor: DesignSystem.colors.background.tertiary,
-    borderRadius: DesignSystem.borderRadius.md,
+    padding: iOSDesignSystem.spacing.md,
+    backgroundColor: iOSDesignSystem.colors.background.tertiary,
+    borderRadius: iOSDesignSystem.borderRadius.md,
     borderWidth: 1,
-    borderColor: DesignSystem.colors.neutral[200],
+    borderColor: iOSDesignSystem.colors.neutral[200],
   },
   eventIcon: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: DesignSystem.colors.primary[50],
+    backgroundColor: iOSDesignSystem.colors.primary[50],
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: DesignSystem.spacing.md,
+    marginRight: iOSDesignSystem.spacing.md,
   },
   eventContent: {
     flex: 1,
   },
   eventTitle: {
-    fontSize: DesignSystem.typography.fontSize.base,
-    fontWeight: DesignSystem.typography.fontWeight.medium,
-    color: DesignSystem.colors.text.primary,
-    marginBottom: DesignSystem.spacing.xs,
+    fontSize: iOSDesignSystem.typography.fontSize.base,
+    fontWeight: iOSDesignSystem.typography.fontWeight.medium as any,
+    color: iOSDesignSystem.colors.text.primary,
+    marginBottom: iOSDesignSystem.spacing.xs,
   },
   eventDescription: {
-    fontSize: DesignSystem.typography.fontSize.sm,
-    color: DesignSystem.colors.text.secondary,
-    marginBottom: DesignSystem.spacing.xs,
+    fontSize: iOSDesignSystem.typography.fontSize.sm,
+    color: iOSDesignSystem.colors.text.secondary,
+    marginBottom: iOSDesignSystem.spacing.xs,
   },
   eventDate: {
-    fontSize: DesignSystem.typography.fontSize.xs,
-    color: DesignSystem.colors.text.tertiary,
+    fontSize: iOSDesignSystem.typography.fontSize.xs,
+    color: iOSDesignSystem.colors.text.tertiary,
   },
   familyCard: {
-    marginBottom: DesignSystem.spacing.lg,
+    marginBottom: iOSDesignSystem.spacing.lg,
   },
   familyFeatures: {
-    gap: DesignSystem.spacing.sm,
+    gap: iOSDesignSystem.spacing.sm,
   },
   familyFeature: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: DesignSystem.spacing.md,
-    backgroundColor: DesignSystem.colors.background.tertiary,
-    borderRadius: DesignSystem.borderRadius.md,
+    padding: iOSDesignSystem.spacing.md,
+    backgroundColor: iOSDesignSystem.colors.background.tertiary,
+    borderRadius: iOSDesignSystem.borderRadius.md,
     borderWidth: 1,
-    borderColor: DesignSystem.colors.neutral[200],
+    borderColor: iOSDesignSystem.colors.neutral[200],
   },
   familyFeatureIcon: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: DesignSystem.colors.primary[50],
+    backgroundColor: iOSDesignSystem.colors.primary[50],
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: DesignSystem.spacing.md,
+    marginRight: iOSDesignSystem.spacing.md,
   },
   familyFeatureContent: {
     flex: 1,
   },
   familyFeatureTitle: {
-    fontSize: DesignSystem.typography.fontSize.base,
-    fontWeight: DesignSystem.typography.fontWeight.medium,
-    color: DesignSystem.colors.text.primary,
-    marginBottom: DesignSystem.spacing.xs,
+    fontSize: iOSDesignSystem.typography.fontSize.base,
+    fontWeight: iOSDesignSystem.typography.fontWeight.medium as any,
+    color: iOSDesignSystem.colors.text.primary,
+    marginBottom: iOSDesignSystem.spacing.xs,
   },
   familyFeatureDescription: {
-    fontSize: DesignSystem.typography.fontSize.sm,
-    color: DesignSystem.colors.text.secondary,
+    fontSize: iOSDesignSystem.typography.fontSize.sm,
+    color: iOSDesignSystem.colors.text.secondary,
   },
   activityCard: {
-    marginBottom: DesignSystem.spacing.lg,
+    marginBottom: iOSDesignSystem.spacing.lg,
   },
   activityList: {
-    gap: DesignSystem.spacing.sm,
+    gap: iOSDesignSystem.spacing.sm,
   },
   activityItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: DesignSystem.spacing.md,
-    backgroundColor: DesignSystem.colors.background.tertiary,
-    borderRadius: DesignSystem.borderRadius.md,
+    padding: iOSDesignSystem.spacing.md,
+    backgroundColor: iOSDesignSystem.colors.background.tertiary,
+    borderRadius: iOSDesignSystem.borderRadius.md,
     borderWidth: 1,
-    borderColor: DesignSystem.colors.neutral[200],
+    borderColor: iOSDesignSystem.colors.neutral[200],
   },
   activityIcon: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: DesignSystem.colors.primary[50],
+    backgroundColor: iOSDesignSystem.colors.primary[50],
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: DesignSystem.spacing.md,
+    marginRight: iOSDesignSystem.spacing.md,
   },
   activityContent: {
     flex: 1,
   },
   activityTitle: {
-    fontSize: DesignSystem.typography.fontSize.base,
-    color: DesignSystem.colors.text.primary,
-    marginBottom: DesignSystem.spacing.xs,
+    fontSize: iOSDesignSystem.typography.fontSize.base,
+    color: iOSDesignSystem.colors.text.primary,
+    marginBottom: iOSDesignSystem.spacing.xs,
   },
   activityTime: {
-    fontSize: DesignSystem.typography.fontSize.sm,
-    color: DesignSystem.colors.text.tertiary,
+    fontSize: iOSDesignSystem.typography.fontSize.sm,
+    color: iOSDesignSystem.colors.text.tertiary,
   },
 });

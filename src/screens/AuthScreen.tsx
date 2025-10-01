@@ -32,7 +32,7 @@ export const AuthScreen: React.FC<Props> = ({ onSignedIn }) => {
       const user = await authService.getCurrentUser();
       if (user) {
         setCurrentUser(user);
-        onSignedIn();
+        onSignedIn(user);
       }
     } catch (error) {
       console.error('Auth initialization error:', error);
@@ -102,7 +102,7 @@ export const AuthScreen: React.FC<Props> = ({ onSignedIn }) => {
             title="Continue with Google"
             onPress={handleGoogleSignIn}
             loading={isLoading}
-            style={[styles.signInButton, styles.googleButton]}
+            style={[styles.signInButton, styles.googleButton] as any}
             icon={<SafeIcon name="google" size={20} color="#fff" />}
           />
 

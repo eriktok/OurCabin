@@ -1,17 +1,25 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from 'react-native';
+import { SafeIcon } from './SafeIcon';
 
 interface AppHeaderProps {
   title: string;
   right?: React.ReactNode;
   left?: React.ReactNode;
+  onBack?: () => void;
 }
 
-export const AppHeader: React.FC<AppHeaderProps> = ({ title, right, left }) => {
+export const AppHeader: React.FC<AppHeaderProps> = ({ title, right, left, onBack }) => {
+  const leftContent = onBack ? (
+    <TouchableOpacity onPress={onBack} style={styles.backButton}>
+      <SafeIcon name="chevron-left" size={24} color="#007AFF" />
+    </TouchableOpacity>
+  ) : left;
+
   return (
     <View style={styles.container}>
-      <View style={styles.side}>{left}</View>
+      <View style={styles.side}>{leftContent}</View>
       <Text style={styles.title}>{title}</Text>
       <View style={styles.side}>{right}</View>
     </View>
@@ -31,4 +39,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   side: { width: 48, alignItems: 'center' },
+  backButton: {
+    padding: 8,
+  },
 });

@@ -1,4 +1,5 @@
 import { Platform, Alert } from 'react-native';
+// @ts-ignore
 import PushNotification from 'react-native-push-notification';
 import PushNotificationIOS from '@react-native-community/push-notification-ios';
 
@@ -11,10 +12,10 @@ export interface NotificationData {
 export class NotificationService {
   static initialize() {
     PushNotification.configure({
-      onRegister: function (token) {
+      onRegister: function (token: any) {
         console.log('TOKEN:', token);
       },
-      onNotification: function (notification) {
+      onNotification: function (notification: any) {
         console.log('NOTIFICATION:', notification);
         
         if (notification.userInteraction) {
@@ -22,11 +23,11 @@ export class NotificationService {
           this.handleNotificationTap(notification);
         }
       },
-      onAction: function (notification) {
+      onAction: function (notification: any) {
         console.log('ACTION:', notification.action);
         console.log('NOTIFICATION:', notification);
       },
-      onRegistrationError: function(err) {
+      onRegistrationError: function(err: any) {
         console.error(err.message, err);
       },
       permissions: {
@@ -45,7 +46,7 @@ export class NotificationService {
 
   static async requestPermissions(): Promise<boolean> {
     return new Promise((resolve) => {
-      PushNotification.requestPermissions().then((permissions) => {
+      PushNotification.requestPermissions().then((permissions: any) => {
         resolve(permissions.alert && permissions.badge && permissions.sound);
       });
     });
@@ -88,7 +89,7 @@ export class NotificationService {
 
   static getDeliveredNotifications() {
     return new Promise((resolve) => {
-      PushNotification.getDeliveredNotifications((notifications) => {
+      PushNotification.getDeliveredNotifications((notifications: any) => {
         resolve(notifications);
       });
     });
@@ -152,6 +153,22 @@ export class NotificationService {
       title: 'New Task Assigned',
       message: `"${taskTitle}" assigned by ${assignedBy}`,
       data: { type: 'task_assigned', taskTitle, assignedBy },
+    });
+  }
+
+  static showTaskOverdueNotification(count: number) {
+    this.sendLocalNotification({
+      title: 'Overdue Tasks',
+      message: `You have ${count} overdue task${count > 1 ? 's' : ''}`,
+      data: { type: 'task_overdue', count },
+    });
+  }
+
+  static showTaskAssignedNotification(taskTitle: string, assigneeName: string) {
+    this.sendLocalNotification({
+      title: 'Task Assigned',
+      message: `${taskTitle} has been assigned to ${assigneeName}`,
+      data: { type: 'task_assigned', taskTitle, assigneeName },
     });
   }
 }

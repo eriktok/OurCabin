@@ -23,7 +23,6 @@ export class FallbackAuthService {
       displayName: 'Demo Google User',
       email: 'demo@google.com',
       photoUrl: null,
-      createdAt: new Date().toISOString(),
     };
 
     await this.storeUser(user);
@@ -38,7 +37,6 @@ export class FallbackAuthService {
       displayName: 'Demo Vipps User',
       email: 'demo@vipps.no',
       photoUrl: null,
-      createdAt: new Date().toISOString(),
     };
 
     await this.storeUser(user);
@@ -89,7 +87,7 @@ export class FallbackAuthService {
 
   private async clearStoredUser(): Promise<void> {
     try {
-      await Keychain.resetInternetCredentials('ourcabin_user');
+      await Keychain.resetInternetCredentials('ourcabin_user' as any);
     } catch (error) {
       console.error('Failed to clear stored user:', error);
     }

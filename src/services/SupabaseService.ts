@@ -27,6 +27,7 @@ export class SupabaseService implements ICabinApiService {
         id: 'p1',
         cabinId,
         authorId: 'demo',
+        authorName: 'Demo User',
         text: 'Welcome to Our Cabin! 🏡',
         createdAt: new Date().toISOString(),
       },
@@ -40,6 +41,7 @@ export class SupabaseService implements ICabinApiService {
       id: Math.random().toString(36).slice(2),
       cabinId,
       authorId: 'demo',
+      authorName: 'Demo User',
       text: postData.text,
       imageUrls: postData.imageUrls,
       createdAt: new Date().toISOString(),
@@ -57,7 +59,9 @@ export class SupabaseService implements ICabinApiService {
       id: Math.random().toString(36).slice(2),
       postId,
       authorId: 'demo',
+      authorName: 'Demo User',
       text,
+      content: text,
       createdAt: new Date().toISOString(),
     };
   }
@@ -137,6 +141,20 @@ export class SupabaseService implements ICabinApiService {
   }
   async generateInviteCode(cabinId: string): Promise<string> {
     return 'INVITE-' + cabinId.slice(0, 4).toUpperCase();
+  }
+
+  async createComment(postId: string, text: string): Promise<Comment> {
+    return this.addComment(postId, text);
+  }
+
+  async assignTask(taskId: string, userId: string): Promise<void> {
+    // For demo purposes, just log the assignment
+    console.log(`Task ${taskId} assigned to user ${userId}`);
+  }
+
+  async rejectBooking(bookingId: string): Promise<void> {
+    // For demo purposes, just log the rejection
+    console.log(`Booking ${bookingId} rejected`);
   }
 }
 

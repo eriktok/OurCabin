@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native';
-import { Card } from '../components/ui/Card';
+import { Card } from '../components/ui/iOSCard';
+import { Button } from '../components/ui/iOSButton';
 import { AppHeader } from '../components/ui/AppHeader';
 import { PrimaryButton } from '../components/ui/PrimaryButton';
 import { SafeIcon } from '../components/ui/SafeIcon';
-import { DesignSystem } from '../theme/designSystem';
+import { iOSDesignSystem } from '../theme/iOSDesignSystem';
+import { iOSList, iOSListItem } from '../components/ui/iOSList';
 import { FamilySharingService, FamilyMember, FamilyEvent, FamilyMemory } from '../services/FamilySharingService';
 import { useAppStore } from '../stores/appStore';
 import { format } from 'date-fns';
@@ -75,11 +77,11 @@ export const FamilySharingScreen: React.FC = () => {
   const MemberCard = ({ member }: { member: FamilyMember }) => {
     const getRoleColor = (role: string) => {
       switch (role) {
-        case 'owner': return DesignSystem.colors.primary[500];
-        case 'admin': return DesignSystem.colors.info;
-        case 'member': return DesignSystem.colors.neutral[600];
-        case 'guest': return DesignSystem.colors.secondary[500];
-        default: return DesignSystem.colors.neutral[400];
+        case 'owner': return iOSDesignSystem.colors.primary;
+        case 'admin': return iOSDesignSystem.colors.info;
+        case 'member': return iOSDesignSystem.colors.neutral[600];
+        case 'guest': return iOSDesignSystem.colors.secondary;
+        default: return iOSDesignSystem.colors.neutral[400];
       }
     };
 
@@ -99,7 +101,7 @@ export const FamilySharingScreen: React.FC = () => {
           {member.photoUrl ? (
             <Image source={{ uri: member.photoUrl }} style={styles.avatarImage} />
           ) : (
-            <SafeIcon name="account-circle" size={40} color={DesignSystem.colors.neutral[400]} />
+            <SafeIcon name="account-circle" size={40} color={iOSDesignSystem.colors.neutral[400]} />
           )}
         </View>
         <View style={styles.memberInfo}>
@@ -119,7 +121,7 @@ export const FamilySharingScreen: React.FC = () => {
           </Text>
         </View>
         <TouchableOpacity style={styles.memberActions}>
-          <SafeIcon name="dots-vertical" size={20} color={DesignSystem.colors.neutral[400]} />
+          <SafeIcon name="dots-vertical" size={20} color={iOSDesignSystem.colors.neutral[400]} />
         </TouchableOpacity>
       </View>
     );
@@ -138,11 +140,11 @@ export const FamilySharingScreen: React.FC = () => {
 
     const getEventColor = (type: string) => {
       switch (type) {
-        case 'booking': return DesignSystem.colors.primary[500];
-        case 'task': return DesignSystem.colors.warning;
-        case 'celebration': return DesignSystem.colors.secondary[500];
-        case 'maintenance': return DesignSystem.colors.info;
-        default: return DesignSystem.colors.neutral[500];
+        case 'booking': return iOSDesignSystem.colors.primary;
+        case 'task': return iOSDesignSystem.colors.warning;
+        case 'celebration': return iOSDesignSystem.colors.secondary;
+        case 'maintenance': return iOSDesignSystem.colors.info;
+        default: return iOSDesignSystem.colors.neutral[500];
       }
     };
 
@@ -155,13 +157,13 @@ export const FamilySharingScreen: React.FC = () => {
           <Text style={styles.eventTitle}>{event.title}</Text>
           <Text style={styles.eventDescription}>{event.description}</Text>
           <View style={styles.eventDetails}>
-            <SafeIcon name="calendar" size={14} color={DesignSystem.colors.neutral[500]} />
+            <SafeIcon name="calendar" size={14} color={iOSDesignSystem.colors.neutral[500]} />
             <Text style={styles.eventDate}>
               {format(new Date(event.startDate), 'MMM dd, yyyy')}
             </Text>
             {event.attendees.length > 0 && (
               <>
-                <SafeIcon name="account-group" size={14} color={DesignSystem.colors.neutral[500]} />
+                <SafeIcon name="account-group" size={14} color={iOSDesignSystem.colors.neutral[500]} />
                 <Text style={styles.eventAttendees}>
                   {event.attendees.length} attending
                 </Text>
@@ -181,9 +183,9 @@ export const FamilySharingScreen: React.FC = () => {
         <Text style={styles.memoryDescription}>{memory.description}</Text>
         <View style={styles.memoryMeta}>
           <View style={styles.memoryStats}>
-            <SafeIcon name="heart" size={16} color={DesignSystem.colors.error} />
+            <SafeIcon name="heart" size={16} color={iOSDesignSystem.colors.error} />
             <Text style={styles.memoryStatText}>{memory.likes}</Text>
-            <SafeIcon name="comment" size={16} color={DesignSystem.colors.neutral[500]} />
+            <SafeIcon name="comment" size={16} color={iOSDesignSystem.colors.neutral[500]} />
             <Text style={styles.memoryStatText}>{memory.comments}</Text>
           </View>
           <Text style={styles.memoryDate}>
@@ -229,8 +231,8 @@ export const FamilySharingScreen: React.FC = () => {
         <PrimaryButton
           title="Share Cabin"
           onPress={handleShareCabin}
-          style={[styles.quickActionButton, styles.secondaryButton]}
-          icon={<SafeIcon name="share" size={20} color={DesignSystem.colors.primary[500]} />}
+          style={[styles.quickActionButton, styles.secondaryButton] as any}
+          icon={<SafeIcon name="share" size={20} color={iOSDesignSystem.colors.primary} />}
         />
       </View>
 
@@ -240,7 +242,7 @@ export const FamilySharingScreen: React.FC = () => {
           style={[styles.tab, activeTab === 'members' && styles.activeTab]}
           onPress={() => setActiveTab('members')}
         >
-          <SafeIcon name="account-group" size={20} color={activeTab === 'members' ? DesignSystem.colors.primary[500] : DesignSystem.colors.neutral[500]} />
+          <SafeIcon name="account-group" size={20} color={activeTab === 'members' ? iOSDesignSystem.colors.primary : iOSDesignSystem.colors.neutral[500]} />
           <Text style={[styles.tabText, activeTab === 'members' && styles.activeTabText]}>
             Members ({familyMembers.length})
           </Text>
@@ -250,7 +252,7 @@ export const FamilySharingScreen: React.FC = () => {
           style={[styles.tab, activeTab === 'events' && styles.activeTab]}
           onPress={() => setActiveTab('events')}
         >
-          <SafeIcon name="calendar" size={20} color={activeTab === 'events' ? DesignSystem.colors.primary[500] : DesignSystem.colors.neutral[500]} />
+          <SafeIcon name="calendar" size={20} color={activeTab === 'events' ? iOSDesignSystem.colors.primary : iOSDesignSystem.colors.neutral[500]} />
           <Text style={[styles.tabText, activeTab === 'events' && styles.activeTabText]}>
             Events ({familyEvents.length})
           </Text>
@@ -260,7 +262,7 @@ export const FamilySharingScreen: React.FC = () => {
           style={[styles.tab, activeTab === 'memories' && styles.activeTab]}
           onPress={() => setActiveTab('memories')}
         >
-          <SafeIcon name="heart" size={20} color={activeTab === 'memories' ? DesignSystem.colors.primary[500] : DesignSystem.colors.neutral[500]} />
+          <SafeIcon name="heart" size={20} color={activeTab === 'memories' ? iOSDesignSystem.colors.primary : iOSDesignSystem.colors.neutral[500]} />
           <Text style={[styles.tabText, activeTab === 'memories' && styles.activeTabText]}>
             Memories ({familyMemories.length})
           </Text>
@@ -314,7 +316,7 @@ export const FamilySharingScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: DesignSystem.colors.background.secondary,
+    backgroundColor: iOSDesignSystem.colors.background.secondary,
   },
   loadingContainer: {
     flex: 1,
@@ -323,70 +325,70 @@ const styles = StyleSheet.create({
   },
   quickActions: {
     flexDirection: 'row',
-    padding: DesignSystem.spacing.md,
-    gap: DesignSystem.spacing.sm,
+    padding: iOSDesignSystem.spacing.md,
+    gap: iOSDesignSystem.spacing.sm,
   },
   quickActionButton: {
     flex: 1,
   },
   secondaryButton: {
-    backgroundColor: DesignSystem.colors.background.primary,
+    backgroundColor: iOSDesignSystem.colors.background.primary,
     borderWidth: 1,
-    borderColor: DesignSystem.colors.primary[500],
+    borderColor: iOSDesignSystem.colors.primary,
   },
   tabContainer: {
     flexDirection: 'row',
-    backgroundColor: DesignSystem.colors.background.primary,
+    backgroundColor: iOSDesignSystem.colors.background.primary,
     borderBottomWidth: 1,
-    borderBottomColor: DesignSystem.colors.neutral[200],
+    borderBottomColor: iOSDesignSystem.colors.neutral[200],
   },
   tab: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: DesignSystem.spacing.md,
-    gap: DesignSystem.spacing.xs,
+    paddingVertical: iOSDesignSystem.spacing.md,
+    gap: iOSDesignSystem.spacing.xs,
   },
   activeTab: {
     borderBottomWidth: 2,
-    borderBottomColor: DesignSystem.colors.primary[500],
+    borderBottomColor: iOSDesignSystem.colors.primary,
   },
   tabText: {
-    fontSize: DesignSystem.typography.fontSize.sm,
-    fontWeight: DesignSystem.typography.fontWeight.medium,
-    color: DesignSystem.colors.neutral[500],
+    fontSize: iOSDesignSystem.typography.fontSize.sm,
+    fontWeight: iOSDesignSystem.typography.fontWeight.medium,
+    color: iOSDesignSystem.colors.neutral[500],
   },
   activeTabText: {
-    color: DesignSystem.colors.primary[500],
+    color: iOSDesignSystem.colors.primary,
   },
   content: {
     flex: 1,
-    padding: DesignSystem.spacing.md,
+    padding: iOSDesignSystem.spacing.md,
   },
   sectionCard: {
-    marginBottom: DesignSystem.spacing.lg,
+    marginBottom: iOSDesignSystem.spacing.lg,
   },
   sectionTitle: {
-    fontSize: DesignSystem.typography.fontSize.lg,
-    fontWeight: DesignSystem.typography.fontWeight.semibold,
-    color: DesignSystem.colors.text.primary,
-    marginBottom: DesignSystem.spacing.md,
+    fontSize: iOSDesignSystem.typography.fontSize.lg,
+    fontWeight: iOSDesignSystem.typography.fontWeight.semibold,
+    color: iOSDesignSystem.colors.text.primary,
+    marginBottom: iOSDesignSystem.spacing.md,
   },
   membersList: {
-    gap: DesignSystem.spacing.sm,
+    gap: iOSDesignSystem.spacing.sm,
   },
   memberCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: DesignSystem.spacing.md,
-    backgroundColor: DesignSystem.colors.background.tertiary,
-    borderRadius: DesignSystem.borderRadius.md,
+    padding: iOSDesignSystem.spacing.md,
+    backgroundColor: iOSDesignSystem.colors.background.tertiary,
+    borderRadius: iOSDesignSystem.borderRadius.md,
     borderWidth: 1,
-    borderColor: DesignSystem.colors.neutral[200],
+    borderColor: iOSDesignSystem.colors.neutral[200],
   },
   memberAvatar: {
-    marginRight: DesignSystem.spacing.md,
+    marginRight: iOSDesignSystem.spacing.md,
   },
   avatarImage: {
     width: 40,
@@ -397,39 +399,39 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   memberName: {
-    fontSize: DesignSystem.typography.fontSize.base,
-    fontWeight: DesignSystem.typography.fontWeight.medium,
-    color: DesignSystem.colors.text.primary,
-    marginBottom: DesignSystem.spacing.xs,
+    fontSize: iOSDesignSystem.typography.fontSize.base,
+    fontWeight: iOSDesignSystem.typography.fontWeight.medium,
+    color: iOSDesignSystem.colors.text.primary,
+    marginBottom: iOSDesignSystem.spacing.xs,
   },
   memberRole: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: DesignSystem.spacing.xs,
-    marginBottom: DesignSystem.spacing.xs,
+    gap: iOSDesignSystem.spacing.xs,
+    marginBottom: iOSDesignSystem.spacing.xs,
   },
   memberRoleText: {
-    fontSize: DesignSystem.typography.fontSize.sm,
-    fontWeight: DesignSystem.typography.fontWeight.medium,
+    fontSize: iOSDesignSystem.typography.fontSize.sm,
+    fontWeight: iOSDesignSystem.typography.fontWeight.medium,
   },
   memberJoined: {
-    fontSize: DesignSystem.typography.fontSize.sm,
-    color: DesignSystem.colors.text.tertiary,
+    fontSize: iOSDesignSystem.typography.fontSize.sm,
+    color: iOSDesignSystem.colors.text.tertiary,
   },
   memberActions: {
-    padding: DesignSystem.spacing.sm,
+    padding: iOSDesignSystem.spacing.sm,
   },
   eventsList: {
-    gap: DesignSystem.spacing.sm,
+    gap: iOSDesignSystem.spacing.sm,
   },
   eventCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: DesignSystem.spacing.md,
-    backgroundColor: DesignSystem.colors.background.tertiary,
-    borderRadius: DesignSystem.borderRadius.md,
+    padding: iOSDesignSystem.spacing.md,
+    backgroundColor: iOSDesignSystem.colors.background.tertiary,
+    borderRadius: iOSDesignSystem.borderRadius.md,
     borderWidth: 1,
-    borderColor: DesignSystem.colors.neutral[200],
+    borderColor: iOSDesignSystem.colors.neutral[200],
   },
   eventIcon: {
     width: 48,
@@ -437,43 +439,43 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: DesignSystem.spacing.md,
+    marginRight: iOSDesignSystem.spacing.md,
   },
   eventContent: {
     flex: 1,
   },
   eventTitle: {
-    fontSize: DesignSystem.typography.fontSize.base,
-    fontWeight: DesignSystem.typography.fontWeight.medium,
-    color: DesignSystem.colors.text.primary,
-    marginBottom: DesignSystem.spacing.xs,
+    fontSize: iOSDesignSystem.typography.fontSize.base,
+    fontWeight: iOSDesignSystem.typography.fontWeight.medium,
+    color: iOSDesignSystem.colors.text.primary,
+    marginBottom: iOSDesignSystem.spacing.xs,
   },
   eventDescription: {
-    fontSize: DesignSystem.typography.fontSize.sm,
-    color: DesignSystem.colors.text.secondary,
-    marginBottom: DesignSystem.spacing.xs,
+    fontSize: iOSDesignSystem.typography.fontSize.sm,
+    color: iOSDesignSystem.colors.text.secondary,
+    marginBottom: iOSDesignSystem.spacing.xs,
   },
   eventDetails: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: DesignSystem.spacing.sm,
+    gap: iOSDesignSystem.spacing.sm,
   },
   eventDate: {
-    fontSize: DesignSystem.typography.fontSize.sm,
-    color: DesignSystem.colors.text.tertiary,
+    fontSize: iOSDesignSystem.typography.fontSize.sm,
+    color: iOSDesignSystem.colors.text.tertiary,
   },
   eventAttendees: {
-    fontSize: DesignSystem.typography.fontSize.sm,
-    color: DesignSystem.colors.text.tertiary,
+    fontSize: iOSDesignSystem.typography.fontSize.sm,
+    color: iOSDesignSystem.colors.text.tertiary,
   },
   memoriesList: {
-    gap: DesignSystem.spacing.md,
+    gap: iOSDesignSystem.spacing.md,
   },
   memoryCard: {
-    backgroundColor: DesignSystem.colors.background.tertiary,
-    borderRadius: DesignSystem.borderRadius.md,
+    backgroundColor: iOSDesignSystem.colors.background.tertiary,
+    borderRadius: iOSDesignSystem.borderRadius.md,
     borderWidth: 1,
-    borderColor: DesignSystem.colors.neutral[200],
+    borderColor: iOSDesignSystem.colors.neutral[200],
     overflow: 'hidden',
   },
   memoryImage: {
@@ -482,52 +484,52 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
   },
   memoryContent: {
-    padding: DesignSystem.spacing.md,
+    padding: iOSDesignSystem.spacing.md,
   },
   memoryTitle: {
-    fontSize: DesignSystem.typography.fontSize.base,
-    fontWeight: DesignSystem.typography.fontWeight.medium,
-    color: DesignSystem.colors.text.primary,
-    marginBottom: DesignSystem.spacing.xs,
+    fontSize: iOSDesignSystem.typography.fontSize.base,
+    fontWeight: iOSDesignSystem.typography.fontWeight.medium,
+    color: iOSDesignSystem.colors.text.primary,
+    marginBottom: iOSDesignSystem.spacing.xs,
   },
   memoryDescription: {
-    fontSize: DesignSystem.typography.fontSize.sm,
-    color: DesignSystem.colors.text.secondary,
-    marginBottom: DesignSystem.spacing.sm,
+    fontSize: iOSDesignSystem.typography.fontSize.sm,
+    color: iOSDesignSystem.colors.text.secondary,
+    marginBottom: iOSDesignSystem.spacing.sm,
   },
   memoryMeta: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: DesignSystem.spacing.sm,
+    marginBottom: iOSDesignSystem.spacing.sm,
   },
   memoryStats: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: DesignSystem.spacing.sm,
+    gap: iOSDesignSystem.spacing.sm,
   },
   memoryStatText: {
-    fontSize: DesignSystem.typography.fontSize.sm,
-    color: DesignSystem.colors.text.tertiary,
+    fontSize: iOSDesignSystem.typography.fontSize.sm,
+    color: iOSDesignSystem.colors.text.tertiary,
   },
   memoryDate: {
-    fontSize: DesignSystem.typography.fontSize.sm,
-    color: DesignSystem.colors.text.tertiary,
+    fontSize: iOSDesignSystem.typography.fontSize.sm,
+    color: iOSDesignSystem.colors.text.tertiary,
   },
   memoryTags: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: DesignSystem.spacing.xs,
+    gap: iOSDesignSystem.spacing.xs,
   },
   memoryTag: {
-    backgroundColor: DesignSystem.colors.primary[50],
-    paddingHorizontal: DesignSystem.spacing.sm,
-    paddingVertical: DesignSystem.spacing.xs,
-    borderRadius: DesignSystem.borderRadius.sm,
+    backgroundColor: iOSDesignSystem.colors.primary + '20',
+    paddingHorizontal: iOSDesignSystem.spacing.sm,
+    paddingVertical: iOSDesignSystem.spacing.xs,
+    borderRadius: iOSDesignSystem.borderRadius.sm,
   },
   memoryTagText: {
-    fontSize: DesignSystem.typography.fontSize.xs,
-    color: DesignSystem.colors.primary[500],
-    fontWeight: DesignSystem.typography.fontWeight.medium,
+    fontSize: iOSDesignSystem.typography.fontSize.xs,
+    color: iOSDesignSystem.colors.primary,
+    fontWeight: iOSDesignSystem.typography.fontWeight.medium,
   },
 });

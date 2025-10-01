@@ -114,11 +114,11 @@ export class AccessibilityService {
 
     // Store listeners for cleanup
     this.listeners.push(
-      screenReaderListener,
-      reduceMotionListener,
-      boldTextListener,
-      grayscaleListener,
-      invertColorsListener
+      () => screenReaderListener.remove(),
+      () => reduceMotionListener.remove(),
+      () => boldTextListener.remove(),
+      () => grayscaleListener.remove(),
+      () => invertColorsListener.remove()
     );
   }
 

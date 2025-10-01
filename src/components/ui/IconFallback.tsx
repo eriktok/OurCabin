@@ -52,7 +52,6 @@ export const IconFallback: React.FC<IconFallbackProps> = ({
       'image': '🖼️',
       'post-outline': '📄',
       'book': '📖',
-      'calendar': '📅',
       'cabin': '🏠',
       'profile': '👤',
       'tasks': '✅',

@@ -49,11 +49,10 @@ export class AuthService {
       const userInfo = await GoogleSignin.signIn();
       
       const user: User = {
-        id: userInfo.user.id,
-        displayName: userInfo.user.name || 'User',
-        email: userInfo.user.email,
-        photoUrl: userInfo.user.photo || null,
-        createdAt: new Date().toISOString(),
+        id: (userInfo as any).data?.user?.id || (userInfo as any).user?.id || 'unknown',
+        displayName: (userInfo as any).data?.user?.name || (userInfo as any).user?.name || 'User',
+        email: (userInfo as any).data?.user?.email || (userInfo as any).user?.email || '',
+        photoUrl: (userInfo as any).data?.user?.photo || (userInfo as any).user?.photo || null,
       };
 
       // Store user in keychain
@@ -86,7 +85,6 @@ export class AuthService {
       displayName: 'Vipps User',
       email: 'user@vipps.no',
       photoUrl: null,
-      createdAt: new Date().toISOString(),
     };
 
     await this.storeUser(user);
@@ -140,7 +138,7 @@ export class AuthService {
 
     try {
       const { GoogleSignin } = await import('@react-native-google-signin/google-signin');
-      const isSignedIn = await GoogleSignin.isSignedIn();
+      const isSignedIn = await (GoogleSignin as any).isSignedIn();
       return isSignedIn;
     } catch (error) {
       console.error('Failed to check sign-in status:', error);
@@ -162,7 +160,7 @@ export class AuthService {
 
   private async clearStoredUser(): Promise<void> {
     try {
-      await Keychain.resetInternetCredentials('ourcabin_user');
+      await Keychain.resetInternetCredentials('ourcabin_user' as any);
     } catch (error) {
       console.error('Failed to clear stored user:', error);
     }

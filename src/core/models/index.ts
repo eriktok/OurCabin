@@ -4,19 +4,20 @@ export interface User {
   id: Identifier;
   displayName: string;
   email?: string;
-  photoUrl?: string;
+  photoUrl?: string | null;
 }
 
 export interface Cabin {
   id: Identifier;
   name: string;
-  photoUrl?: string;
+  photoUrl?: string | null;
 }
 
 export interface Post {
   id: Identifier;
   cabinId: Identifier;
   authorId: Identifier;
+  authorName: string;
   text: string;
   imageUrls?: string[];
   createdAt: string;
@@ -44,14 +45,18 @@ export interface Booking {
   startDate: string; // ISO date
   endDate: string;   // ISO date
   createdAt: string;
-  status?: 'pending' | 'approved';
+  status?: 'pending' | 'approved' | 'rejected';
 }
 
 export interface Comment {
   id: Identifier;
   postId: Identifier;
   authorId: Identifier;
+  authorName: string;
   text: string;
+  content: string;
   createdAt: string;
 }
+
+export type { CabinSettings, CabinMember, CabinInvite } from './CabinSettings';
 

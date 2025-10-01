@@ -17,19 +17,22 @@ export interface ICabinApiService {
   likePost(postId: string): Promise<void>;
   getComments(postId: string): Promise<Comment[]>;
   addComment(postId: string, text: string): Promise<Comment>;
+  createComment(postId: string, text: string): Promise<Comment>;
 
   // Tasks
   getTasks(cabinId: string): Promise<Task[]>;
   createTask(
     cabinId: string,
-    taskData: { title: string; description?: string }
+    taskData: { title: string; description?: string; priority?: 'low' | 'medium' | 'high'; dueDate?: string; assignedTo?: string }
   ): Promise<Task>;
   updateTask(taskId: string, updates: Partial<Task>): Promise<void>;
+  assignTask(taskId: string, userId: string): Promise<void>;
 
   // Booking (MVP basic)
   getBookings(cabinId: string): Promise<Booking[]>;
   requestBooking(cabinId: string, range: { startDate: string; endDate: string }): Promise<Booking>;
   approveBooking(bookingId: string): Promise<void>;
+  rejectBooking(bookingId: string): Promise<void>;
 
   // Cabins
   listCabinsForUser(userId: string): Promise<Cabin[]>;

@@ -6,6 +6,7 @@ import { Card } from '../components/ui/Card';
 import { AppHeader } from '../components/ui/AppHeader';
 import { SafeIcon } from '../components/ui/SafeIcon';
 import { EditProfileModal } from '../components/EditProfileModal';
+import { User } from '../core/models';
 
 export const UserProfileScreen: React.FC = () => {
   const { currentUser, selectedCabin, setCurrentUser } = useAppStore();
