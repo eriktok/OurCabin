@@ -1,4 +1,4 @@
-import { User, Task, Post, Booking } from '../models';
+import { User, Task, Post, Booking, Cabin } from '../models';
 
 export interface ICabinApiService {
   // Auth
@@ -6,6 +6,7 @@ export interface ICabinApiService {
   signInWithVipps(): Promise<User>;
   signOut(): Promise<void>;
   onAuthStateChanged(callback: (user: User | null) => void): () => void;
+  getCurrentUser(): Promise<User | null>;
 
   // Posts (Logbook)
   getPosts(cabinId: string, limit: number): Promise<Post[]>;
@@ -24,6 +25,12 @@ export interface ICabinApiService {
 
   // Booking (MVP basic)
   getBookings(cabinId: string): Promise<Booking[]>;
+
+  // Cabins
+  listCabinsForUser(userId: string): Promise<Cabin[]>;
+  createCabin(name: string): Promise<Cabin>;
+  joinCabin(inviteCode: string): Promise<Cabin>;
+  generateInviteCode(cabinId: string): Promise<string>;
 }
 
 

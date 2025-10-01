@@ -16,6 +16,9 @@ import { LogbookScreen } from './src/screens/LogbookScreen';
 import { TasksScreen } from './src/screens/TasksScreen';
 import { CalendarScreen } from './src/screens/CalendarScreen';
 import { ServiceProvider } from './src/services/ServiceProvider';
+import { AuthScreen } from './src/screens/AuthScreen';
+import { CabinGateScreen } from './src/screens/CabinGateScreen';
+import { useCabinApi } from './src/services/ServiceProvider';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
@@ -32,11 +35,29 @@ function AppContent() {
   const safeAreaInsets = useSafeAreaInsets();
   const [hasOnboarded, setHasOnboarded] = useState<boolean>(true);
   const [tab, setTab] = useState<'logbook' | 'tasks' | 'calendar'>('logbook');
+  const [userId, setUserId] = useState<string | null>(null);
+  const [cabinId, setCabinId] = useState<string | null>(null);
 
   if (!hasOnboarded) {
     return (
       <ServiceProvider>
         <OnboardingScreen onContinue={() => setHasOnboarded(true)} />
+      </ServiceProvider>
+    );
+  }
+
+  if (!userId) {
+    return (
+      <ServiceProvider>
+        <AuthScreen onSignedIn={() => setUserId('demo')} />
+      </ServiceProvider>
+    );
+  }
+
+  if (!cabinId) {
+    return (
+      <ServiceProvider>
+        <CabinGateScreen userId={userId} onCabinSelected={(c) => setCabinId(c.id)} />
       </ServiceProvider>
     );
   }

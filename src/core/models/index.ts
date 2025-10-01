@@ -7,6 +7,12 @@ export interface User {
   photoUrl?: string;
 }
 
+export interface Cabin {
+  id: Identifier;
+  name: string;
+  photoUrl?: string;
+}
+
 export interface Post {
   id: Identifier;
   cabinId: Identifier;

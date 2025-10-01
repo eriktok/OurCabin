@@ -1,5 +1,5 @@
 import { ICabinApiService } from '../core/services/ICabinApiService';
-import { Booking, Post, Task, User } from '../core/models';
+import { Booking, Cabin, Post, Task, User } from '../core/models';
 
 export class SupabaseService implements ICabinApiService {
   // Auth (stubs)
@@ -15,6 +15,9 @@ export class SupabaseService implements ICabinApiService {
   onAuthStateChanged(callback: (user: User | null) => void): () => void {
     callback({ id: 'demo', displayName: 'Demo User' });
     return () => undefined;
+  }
+  async getCurrentUser(): Promise<User | null> {
+    return { id: 'demo', displayName: 'Demo User' };
   }
 
   // Posts
@@ -87,6 +90,22 @@ export class SupabaseService implements ICabinApiService {
         createdAt: today.toISOString(),
       },
     ];
+  }
+
+  // Cabins (stubs)
+  async listCabinsForUser(userId: string): Promise<Cabin[]> {
+    return [
+      { id: 'demo-cabin', name: 'Tokheim Family Cabin' },
+    ];
+  }
+  async createCabin(name: string): Promise<Cabin> {
+    return { id: Math.random().toString(36).slice(2), name };
+  }
+  async joinCabin(inviteCode: string): Promise<Cabin> {
+    return { id: 'joined-' + inviteCode, name: 'Joined Cabin' };
+  }
+  async generateInviteCode(cabinId: string): Promise<string> {
+    return 'INVITE-' + cabinId.slice(0, 4).toUpperCase();
   }
 }
 
