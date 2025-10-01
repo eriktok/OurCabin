@@ -20,18 +20,22 @@ import { AuthScreen } from './src/screens/AuthScreen';
 import { CabinGateScreen } from './src/screens/CabinGateScreen';
 import { CabinSettingsScreen } from './src/screens/CabinSettingsScreen';
 import { UserProfileScreen } from './src/screens/UserProfileScreen';
-import { useCabinApi } from './src/services/ServiceProvider';
 import { useAppStore } from './src/stores/appStore';
 import { NotificationService } from './src/services/NotificationService';
 import { useEffect } from 'react';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { getTheme } from './src/theme/paperTheme';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
+  const theme = getTheme(isDarkMode);
 
   return (
     <SafeAreaProvider>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
+      <View style={[styles.appBackground, { backgroundColor: theme.colors.background }]}>
+        <AppContent />
+      </View>
     </SafeAreaProvider>
   );
 }
@@ -42,9 +46,8 @@ function AppContent() {
   const [tab, setTab] = useState<'logbook' | 'tasks' | 'calendar' | 'cabin' | 'profile'>('logbook');
   const [userId, setUserId] = useState<string | null>(null);
   const [cabinId, setCabinId] = useState<string | null>(null);
-  const { currentUser, setCurrentUser, setSelectedCabin } = useAppStore();
+  const { setCurrentUser, setSelectedCabin } = useAppStore();
 
-  // Initialize notifications
   useEffect(() => {
     NotificationService.initialize();
   }, []);
@@ -85,7 +88,7 @@ function AppContent() {
   return (
     <ServiceProvider>
       <View style={styles.container}>
-        <View style={[styles.content, { paddingTop: safeAreaInsets.top }] }>
+        <View style={[styles.content, { paddingTop: safeAreaInsets.top }]}>
           {tab === 'logbook' && <LogbookScreen />}
           {tab === 'tasks' && <TasksScreen />}
           {tab === 'calendar' && <CalendarScreen />}
@@ -97,26 +100,28 @@ function AppContent() {
           {tab === 'profile' && <UserProfileScreen />}
         </View>
         <View style={[styles.tabBar, { paddingBottom: safeAreaInsets.bottom }] }>
-          <TabButton label="Logbook" active={tab === 'logbook'} onPress={() => setTab('logbook')} />
-          <TabButton label="Tasks" active={tab === 'tasks'} onPress={() => setTab('tasks')} />
-          <TabButton label="Calendar" active={tab === 'calendar'} onPress={() => setTab('calendar')} />
-          <TabButton label="Cabin" active={tab === 'cabin'} onPress={() => setTab('cabin')} />
-          <TabButton label="Profile" active={tab === 'profile'} onPress={() => setTab('profile')} />
+          <TabButton label="Logbook" icon="post" active={tab === 'logbook'} onPress={() => setTab('logbook')} />
+          <TabButton label="Tasks" icon="check-circle-outline" active={tab === 'tasks'} onPress={() => setTab('tasks')} />
+          <TabButton label="Calendar" icon="calendar-month" active={tab === 'calendar'} onPress={() => setTab('calendar')} />
+          <TabButton label="Cabin" icon="home-outline" active={tab === 'cabin'} onPress={() => setTab('cabin')} />
+          <TabButton label="Profile" icon="account-circle" active={tab === 'profile'} onPress={() => setTab('profile')} />
         </View>
       </View>
     </ServiceProvider>
   );
 }
 
-function TabButton({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
+function TabButton({ label, icon, active, onPress }: { label: string; icon: string; active: boolean; onPress: () => void }) {
   return (
     <TouchableOpacity onPress={onPress} style={[styles.tabButton, active && styles.tabButtonActive]}>
+      <Icon name={icon} size={20} color={active ? '#2E7D32' : '#666'} />
       <Text style={[styles.tabLabel, active && styles.tabLabelActive]}>{label}</Text>
     </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
+  appBackground: { flex: 1 },
   container: {
     flex: 1,
     backgroundColor: '#f8f9fa',
@@ -135,25 +140,26 @@ const styles = StyleSheet.create({
   },
   tabButton: { 
     flex: 1, 
-    paddingVertical: 12, 
+    paddingVertical: 8, 
     alignItems: 'center',
     borderRadius: 8,
     margin: 4,
+    gap: 2,
   },
   tabButtonActive: { 
-    backgroundColor: '#e3f2fd',
+    backgroundColor: '#E8F5E9',
     borderWidth: 1,
-    borderColor: '#2196f3',
+    borderColor: '#2E7D32',
   },
   tabLabel: { 
     color: '#666',
-    fontSize: 12,
-    fontWeight: '500',
+    fontSize: 11,
+    fontWeight: '600',
   },
   tabLabelActive: { 
-    color: '#2196f3', 
-    fontWeight: '700',
-    fontSize: 12,
+    color: '#2E7D32', 
+    fontWeight: '800',
+    fontSize: 11,
   },
 });
 

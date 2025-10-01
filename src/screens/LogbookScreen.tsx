@@ -1,65 +1,68 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TextInput, Button, StyleSheet, TouchableOpacity, Image, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { Post } from '../core/models';
 import { useCabinApi } from '../services/ServiceProvider';
-import { launchImageLibrary, ImagePickerResponse, MediaType } from 'react-native-image-picker';
 import { useAsync } from '../hooks/useAsync';
 import { ErrorHandler } from '../utils/errorHandler';
+import { PostComposerModal } from '../components/PostComposerModal';
+import { CommentsSection } from '../components/CommentsSection';
+import { Card } from '../components/ui/Card';
+import { AppHeader } from '../components/ui/AppHeader';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { formatDistanceToNow } from 'date-fns';
 
 export const LogbookScreen: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([]);
-  const [text, setText] = useState('');
-  const [selectedImages, setSelectedImages] = useState<string[]>([]);
+  const [showComposer, setShowComposer] = useState(false);
+  const [showComments, setShowComments] = useState(false);
+  const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const api = useCabinApi();
   const { loading, error, execute } = useAsync<Post[]>();
 
   useEffect(() => {
+    loadPosts();
+  }, []);
+
+  const loadPosts = () => {
     execute(() => api.getPosts('demo-cabin', 20))
       .then(setPosts)
       .catch((err) => {
         ErrorHandler.showAlert(ErrorHandler.handle(err));
       });
-  }, [api, execute]);
-
-  const pickImages = () => {
-    const options = {
-      mediaType: 'photo' as MediaType,
-      quality: 0.8 as const,
-      selectionLimit: 3,
-    };
-    
-    launchImageLibrary(options, (response: ImagePickerResponse) => {
-      if (response.assets && response.assets.length > 0) {
-        const imageUris = response.assets.map(asset => asset.uri!).filter(Boolean);
-        setSelectedImages(prev => [...prev, ...imageUris].slice(0, 3));
-      }
-    });
   };
 
-  const removeImage = (index: number) => {
-    setSelectedImages(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const submit = async () => {
-    if (!text.trim() && selectedImages.length === 0) return;
-    
+  const handleCreatePost = async (content: string, imageUri?: string) => {
     try {
       const created = await api.createPost('demo-cabin', { 
-        text, 
-        imageUrls: selectedImages 
+        text: content, 
+        imageUrls: imageUri ? [imageUri] : []
       });
-      setPosts((p) => [created, ...p]);
-      setText('');
-      setSelectedImages([]);
+      setPosts(prev => [created, ...prev]);
     } catch (err) {
       ErrorHandler.showAlert(ErrorHandler.handle(err));
     }
   };
 
+  const handleLikePost = async (postId: string) => {
+    try {
+      await api.likePost(postId);
+      setPosts(prev => prev.map(p => 
+        p.id === postId ? { ...p, likes: (p.likes ?? 0) + 1 } : p
+      ));
+    } catch (err) {
+      ErrorHandler.showAlert(ErrorHandler.handle(err));
+    }
+  };
+
+  const handleShowComments = (postId: string) => {
+    setSelectedPostId(postId);
+    setShowComments(true);
+  };
+
   if (loading && posts.length === 0) {
     return (
       <View style={[styles.container, styles.centerContent]}>
-        <ActivityIndicator size="large" color="#2196f3" />
+        <ActivityIndicator size="large" color="#2E7D32" />
         <Text style={styles.loadingText}>Loading posts...</Text>
       </View>
     );
@@ -69,50 +72,38 @@ export const LogbookScreen: React.FC = () => {
     return (
       <View style={[styles.container, styles.centerContent]}>
         <Text style={styles.errorText}>Failed to load posts</Text>
-        <Button title="Retry" onPress={() => {
-          execute(() => api.getPosts('demo-cabin', 20))
-            .then(setPosts)
-            .catch((err) => ErrorHandler.showAlert(ErrorHandler.handle(err)));
-        }} />
+        <TouchableOpacity style={styles.retryButton} onPress={loadPosts}>
+          <Text style={styles.retryButtonText}>Retry</Text>
+        </TouchableOpacity>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <View style={styles.composer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Write a post..."
-          value={text}
-          onChangeText={setText}
-          multiline
-        />
-        <Button title="📷" onPress={pickImages} />
-        <Button title="Post" onPress={submit} />
-      </View>
+      <AppHeader 
+        title="Cabin Logbook" 
+        right={
+          <TouchableOpacity onPress={() => setShowComposer(true)}>
+            <Icon name="plus" size={24} color="#2E7D32" />
+          </TouchableOpacity>
+        }
+      />
       
-      {selectedImages.length > 0 && (
-        <View style={styles.imagePreview}>
-          {selectedImages.map((uri, index) => (
-            <View key={index} style={styles.imageContainer}>
-              <Image source={{ uri }} style={styles.previewImage} />
-              <TouchableOpacity 
-                style={styles.removeImageBtn} 
-                onPress={() => removeImage(index)}
-              >
-                <Text style={styles.removeImageText}>×</Text>
-              </TouchableOpacity>
-            </View>
-          ))}
-        </View>
-      )}
       <FlatList
         data={posts}
         keyExtractor={(p) => p.id}
         renderItem={({ item }) => (
-          <View style={styles.post}>
+          <Card>
+            <View style={styles.postHeader}>
+              <Text style={styles.postAuthor}>{item.authorName}</Text>
+              <Text style={styles.postTime}>
+                {formatDistanceToNow(new Date(item.createdAt), { addSuffix: true })}
+              </Text>
+            </View>
+            
             <Text style={styles.postText}>{item.text}</Text>
+            
             {item.imageUrls && item.imageUrls.length > 0 && (
               <View style={styles.postImages}>
                 {item.imageUrls.map((uri, index) => (
@@ -120,96 +111,156 @@ export const LogbookScreen: React.FC = () => {
                 ))}
               </View>
             )}
-            <Text style={styles.meta}>{new Date(item.createdAt).toLocaleString()}</Text>
-            <View style={styles.row}>
+            
+            <View style={styles.postActions}>
               <TouchableOpacity
-                onPress={async () => {
-                  await api.likePost(item.id);
-                  setPosts((prev) => prev.map((p) => (p.id === item.id ? { ...p, likes: (p.likes ?? 0) + 1 } : p)));
-                }}
-                style={styles.likeBtn}
+                onPress={() => handleLikePost(item.id)}
+                style={styles.actionButton}
               >
-                <Text>❤️ {item.likes ?? 0}</Text>
+                <Icon name="heart-outline" size={20} color="#666" />
+                <Text style={styles.actionText}>{item.likes ?? 0}</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                onPress={() => handleShowComments(item.id)}
+                style={styles.actionButton}
+              >
+                <Icon name="comment-outline" size={20} color="#666" />
+                <Text style={styles.actionText}>Comment</Text>
               </TouchableOpacity>
             </View>
-          </View>
+          </Card>
         )}
         contentContainerStyle={styles.list}
+        showsVerticalScrollIndicator={false}
+        ListEmptyComponent={
+          <View style={styles.emptyState}>
+            <Icon name="post-outline" size={64} color="#ccc" />
+            <Text style={styles.emptyText}>No posts yet</Text>
+            <Text style={styles.emptySubtext}>Share what's happening at the cabin!</Text>
+          </View>
+        }
       />
+
+      <PostComposerModal
+        visible={showComposer}
+        onClose={() => setShowComposer(false)}
+        onSubmit={handleCreatePost}
+      />
+
+      {selectedPostId && (
+        <CommentsSection
+          postId={selectedPostId}
+          visible={showComments}
+          onClose={() => {
+            setShowComments(false);
+            setSelectedPostId(null);
+          }}
+        />
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: '#f8f9fa' },
-  composer: { 
-    flexDirection: 'row', 
-    gap: 12, 
-    marginBottom: 16, 
-    alignItems: 'center',
-    backgroundColor: 'white',
-    padding: 12,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  input: { 
+  container: { 
     flex: 1, 
-    borderWidth: 1, 
-    borderColor: '#e9ecef', 
-    borderRadius: 8, 
-    padding: 12, 
-    minHeight: 40,
-    fontSize: 16,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#F7F8FA' 
   },
-  list: { gap: 12 },
-  post: { 
-    padding: 16, 
-    borderRadius: 12, 
-    backgroundColor: 'white', 
-    borderWidth: 1, 
-    borderColor: '#e9ecef',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
+  list: { 
+    paddingBottom: 16 
   },
-  postText: { fontSize: 16, lineHeight: 24, color: '#2c3e50' },
-  meta: { fontSize: 12, color: '#6c757d', marginTop: 8, fontWeight: '500' },
-  row: { flexDirection: 'row', justifyContent: 'flex-start', marginTop: 12 },
-  likeBtn: { 
-    paddingVertical: 8, 
-    paddingHorizontal: 12, 
-    borderWidth: 1, 
-    borderColor: '#e9ecef', 
-    borderRadius: 20,
-    backgroundColor: '#f8f9fa',
+  postHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
   },
-  imagePreview: { flexDirection: 'row', gap: 8, marginBottom: 16, flexWrap: 'wrap' },
-  imageContainer: { position: 'relative' },
-  previewImage: { width: 80, height: 80, borderRadius: 8 },
-  removeImageBtn: { 
-    position: 'absolute', 
-    top: -5, 
-    right: -5, 
-    backgroundColor: '#dc3545', 
-    borderRadius: 10, 
-    width: 20, 
-    height: 20, 
-    alignItems: 'center', 
-    justifyContent: 'center' 
+  postAuthor: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#2E7D32',
   },
-  removeImageText: { color: 'white', fontWeight: 'bold', fontSize: 14 },
-  postImages: { flexDirection: 'row', gap: 8, marginTop: 12, flexWrap: 'wrap' },
-  postImage: { width: 100, height: 100, borderRadius: 8 },
-  centerContent: { justifyContent: 'center', alignItems: 'center' },
-  loadingText: { marginTop: 12, fontSize: 16, color: '#666' },
-  errorText: { fontSize: 16, color: '#dc3545', marginBottom: 12 },
+  postTime: {
+    fontSize: 12,
+    color: '#666',
+  },
+  postText: { 
+    fontSize: 16, 
+    lineHeight: 24, 
+    color: '#1A1F2C',
+    marginBottom: 12,
+  },
+  postImages: { 
+    flexDirection: 'row', 
+    gap: 8, 
+    marginBottom: 12, 
+    flexWrap: 'wrap' 
+  },
+  postImage: { 
+    width: 120, 
+    height: 120, 
+    borderRadius: 8 
+  },
+  postActions: {
+    flexDirection: 'row',
+    gap: 16,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#F0F0F0',
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 4,
+  },
+  actionText: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '500',
+  },
+  centerContent: { 
+    justifyContent: 'center', 
+    alignItems: 'center' 
+  },
+  loadingText: { 
+    marginTop: 12, 
+    fontSize: 16, 
+    color: '#666' 
+  },
+  errorText: { 
+    fontSize: 16, 
+    color: '#D32F2F', 
+    marginBottom: 12 
+  },
+  retryButton: {
+    backgroundColor: '#2E7D32',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+  },
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: 48,
+    paddingHorizontal: 32,
+  },
+  emptyText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#666',
+    marginTop: 16,
+  },
+  emptySubtext: {
+    fontSize: 14,
+    color: '#999',
+    marginTop: 8,
+    textAlign: 'center',
+  },
 });
 
 
