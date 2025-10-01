@@ -15,6 +15,8 @@ import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { LogbookScreen } from './src/screens/LogbookScreen';
 import { TasksScreen } from './src/screens/TasksScreen';
 import { CalendarScreen } from './src/screens/CalendarScreen';
+import { CabinHomeScreen } from './src/screens/CabinHomeScreen';
+import { FamilySharingScreen } from './src/screens/FamilySharingScreen';
 import { ServiceProvider } from './src/services/ServiceProvider';
 import { AuthScreen } from './src/screens/AuthScreen';
 import { CabinGateScreen } from './src/screens/CabinGateScreen';
