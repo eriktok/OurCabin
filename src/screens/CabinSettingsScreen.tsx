@@ -5,7 +5,7 @@ import { useAppStore } from '../stores/appStore';
 import { Card } from '../components/ui/Card';
 import { AppHeader } from '../components/ui/AppHeader';
 import { PrimaryButton } from '../components/ui/PrimaryButton';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { SafeIcon } from '../components/ui/SafeIcon';
 
 interface Props {
   cabinId: string;
@@ -61,7 +61,7 @@ export const CabinSettingsScreen: React.FC<Props> = ({ cabinId, onSignOut }) => 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <Card>
           <View style={styles.cabinInfo}>
-            <Icon name="home" size={24} color="#2E7D32" />
+            <SafeIcon name="home" size={24} color="#2E7D32" />
             <View style={styles.cabinDetails}>
               <Text style={styles.cabinName}>{selectedCabin?.name || 'Cabin'}</Text>
               <Text style={styles.cabinId}>ID: {cabinId}</Text>
@@ -71,7 +71,7 @@ export const CabinSettingsScreen: React.FC<Props> = ({ cabinId, onSignOut }) => 
 
         <Card>
           <View style={styles.sectionHeader}>
-            <Icon name="account-plus" size={20} color="#2E7D32" />
+            <SafeIcon name="account-plus" size={20} color="#2E7D32" />
             <Text style={styles.sectionTitle}>Invite Members</Text>
           </View>
           
@@ -95,12 +95,12 @@ export const CabinSettingsScreen: React.FC<Props> = ({ cabinId, onSignOut }) => 
               
               <View style={styles.inviteActions}>
                 <TouchableOpacity style={styles.actionButton} onPress={copyInviteCode}>
-                  <Icon name="content-copy" size={16} color="#2E7D32" />
+                  <SafeIcon name="content-copy" size={16} color="#2E7D32" />
                   <Text style={styles.actionButtonText}>Copy</Text>
                 </TouchableOpacity>
                 
                 <TouchableOpacity style={styles.actionButton} onPress={shareInviteCode}>
-                  <Icon name="share" size={16} color="#2E7D32" />
+                  <SafeIcon name="share" size={16} color="#2E7D32" />
                   <Text style={styles.actionButtonText}>Share</Text>
                 </TouchableOpacity>
               </View>
@@ -110,43 +110,43 @@ export const CabinSettingsScreen: React.FC<Props> = ({ cabinId, onSignOut }) => 
 
         <Card>
           <View style={styles.sectionHeader}>
-            <Icon name="cog" size={20} color="#2E7D32" />
+            <SafeIcon name="cog" size={20} color="#2E7D32" />
             <Text style={styles.sectionTitle}>Cabin Settings</Text>
           </View>
           
           <TouchableOpacity style={styles.settingItem}>
             <View style={styles.settingInfo}>
-              <Icon name="pencil" size={20} color="#666" />
+              <SafeIcon name="pencil" size={20} color="#666" />
               <Text style={styles.settingText}>Edit Cabin Name</Text>
             </View>
-            <Icon name="chevron-right" size={20} color="#ccc" />
+            <SafeIcon name="chevron-right" size={20} color="#ccc" />
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.settingItem}>
             <View style={styles.settingInfo}>
-              <Icon name="account-group" size={20} color="#666" />
+              <SafeIcon name="account-group" size={20} color="#666" />
               <Text style={styles.settingText}>Manage Members</Text>
             </View>
-            <Icon name="chevron-right" size={20} color="#ccc" />
+            <SafeIcon name="chevron-right" size={20} color="#ccc" />
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.settingItem}>
             <View style={styles.settingInfo}>
-              <Icon name="calendar" size={20} color="#666" />
+              <SafeIcon name="calendar" size={20} color="#666" />
               <Text style={styles.settingText}>Booking Rules</Text>
             </View>
-            <Icon name="chevron-right" size={20} color="#ccc" />
+            <SafeIcon name="chevron-right" size={20} color="#ccc" />
           </TouchableOpacity>
         </Card>
 
         <Card>
           <View style={styles.sectionHeader}>
-            <Icon name="account" size={20} color="#2E7D32" />
+            <SafeIcon name="account" size={20} color="#2E7D32" />
             <Text style={styles.sectionTitle}>Account</Text>
           </View>
           
           <TouchableOpacity style={styles.signOutButton} onPress={onSignOut}>
-            <Icon name="logout" size={20} color="#fff" />
+            <SafeIcon name="logout" size={20} color="#fff" />
             <Text style={styles.signOutText}>Sign Out</Text>
           </TouchableOpacity>
         </Card>

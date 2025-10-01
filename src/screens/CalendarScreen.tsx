@@ -5,7 +5,7 @@ import { useCabinApi } from '../services/ServiceProvider';
 import { Card } from '../components/ui/Card';
 import { AppHeader } from '../components/ui/AppHeader';
 import { PrimaryButton } from '../components/ui/PrimaryButton';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { SafeIcon } from '../components/ui/SafeIcon';
 import { format, addDays, startOfDay, isAfter, isBefore } from 'date-fns';
 
 export const CalendarScreen: React.FC = () => {
@@ -74,7 +74,7 @@ export const CalendarScreen: React.FC = () => {
     }
   };
 
-  const getStatusIcon = (status: string) => {
+  const getStatusSafeIcon = (status: string) => {
     switch (status) {
       case 'approved': return 'check-circle';
       case 'pending': return 'clock-outline';
@@ -89,7 +89,7 @@ export const CalendarScreen: React.FC = () => {
         title="Calendar" 
         right={
           <TouchableOpacity onPress={() => setShowRequestModal(true)}>
-            <Icon name="plus" size={24} color="#2E7D32" />
+            <SafeIcon name="plus" size={24} color="#2E7D32" />
           </TouchableOpacity>
         }
       />
@@ -107,8 +107,8 @@ export const CalendarScreen: React.FC = () => {
                 <Text style={styles.bookingUser}>Requested by {item.userId}</Text>
               </View>
               <View style={styles.statusContainer}>
-                <Icon 
-                  name={getStatusIcon(item.status || 'approved')} 
+                <SafeIcon 
+                  name={getStatusSafeIcon(item.status || 'approved')} 
                   size={20} 
                   color={getStatusColor(item.status || 'approved')} 
                 />
@@ -124,14 +124,14 @@ export const CalendarScreen: React.FC = () => {
                   style={[styles.actionButton, styles.approveButton]}
                   onPress={() => approveBooking(item.id)}
                 >
-                  <Icon name="check" size={16} color="#fff" />
+                  <SafeIcon name="check" size={16} color="#fff" />
                   <Text style={styles.actionButtonText}>Approve</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.actionButton, styles.rejectButton]}
                   onPress={() => rejectBooking(item.id)}
                 >
-                  <Icon name="close" size={16} color="#fff" />
+                  <SafeIcon name="close" size={16} color="#fff" />
                   <Text style={styles.actionButtonText}>Reject</Text>
                 </TouchableOpacity>
               </View>
@@ -142,7 +142,7 @@ export const CalendarScreen: React.FC = () => {
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <View style={styles.emptyState}>
-            <Icon name="calendar-outline" size={64} color="#ccc" />
+            <SafeIcon name="calendar-outline" size={64} color="#ccc" />
             <Text style={styles.emptyText}>No bookings yet</Text>
             <Text style={styles.emptySubtext}>Request your first cabin stay!</Text>
           </View>
@@ -167,7 +167,7 @@ export const CalendarScreen: React.FC = () => {
             <View style={styles.dateSection}>
               <Text style={styles.sectionTitle}>Start Date</Text>
               <TouchableOpacity style={styles.dateButton}>
-                <Icon name="calendar" size={20} color="#2E7D32" />
+                <SafeIcon name="calendar" size={20} color="#2E7D32" />
                 <Text style={styles.dateText}>
                   {format(newBooking.startDate, 'MMM dd, yyyy')}
                 </Text>
@@ -177,7 +177,7 @@ export const CalendarScreen: React.FC = () => {
             <View style={styles.dateSection}>
               <Text style={styles.sectionTitle}>End Date</Text>
               <TouchableOpacity style={styles.dateButton}>
-                <Icon name="calendar" size={20} color="#2E7D32" />
+                <SafeIcon name="calendar" size={20} color="#2E7D32" />
                 <Text style={styles.dateText}>
                   {format(newBooking.endDate, 'MMM dd, yyyy')}
                 </Text>

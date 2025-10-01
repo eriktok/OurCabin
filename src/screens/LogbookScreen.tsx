@@ -8,7 +8,7 @@ import { PostComposerModal } from '../components/PostComposerModal';
 import { CommentsSection } from '../components/CommentsSection';
 import { Card } from '../components/ui/Card';
 import { AppHeader } from '../components/ui/AppHeader';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { SafeIcon } from '../components/ui/SafeIcon';
 import { formatDistanceToNow } from 'date-fns';
 
 export const LogbookScreen: React.FC = () => {
@@ -85,7 +85,7 @@ export const LogbookScreen: React.FC = () => {
         title="Cabin Logbook" 
         right={
           <TouchableOpacity onPress={() => setShowComposer(true)}>
-            <Icon name="plus" size={24} color="#2E7D32" />
+            <SafeIcon name="plus" size={24} color="#2E7D32" />
           </TouchableOpacity>
         }
       />
@@ -117,7 +117,7 @@ export const LogbookScreen: React.FC = () => {
                 onPress={() => handleLikePost(item.id)}
                 style={styles.actionButton}
               >
-                <Icon name="heart-outline" size={20} color="#666" />
+                <SafeIcon name="heart-outline" size={20} color="#666" />
                 <Text style={styles.actionText}>{item.likes ?? 0}</Text>
               </TouchableOpacity>
               
@@ -125,7 +125,7 @@ export const LogbookScreen: React.FC = () => {
                 onPress={() => handleShowComments(item.id)}
                 style={styles.actionButton}
               >
-                <Icon name="comment-outline" size={20} color="#666" />
+                <SafeIcon name="comment-outline" size={20} color="#666" />
                 <Text style={styles.actionText}>Comment</Text>
               </TouchableOpacity>
             </View>
@@ -135,7 +135,7 @@ export const LogbookScreen: React.FC = () => {
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <View style={styles.emptyState}>
-            <Icon name="post-outline" size={64} color="#ccc" />
+            <SafeIcon name="post-outline" size={64} color="#ccc" />
             <Text style={styles.emptyText}>No posts yet</Text>
             <Text style={styles.emptySubtext}>Share what's happening at the cabin!</Text>
           </View>

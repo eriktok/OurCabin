@@ -5,7 +5,7 @@ import { useCabinApi } from '../services/ServiceProvider';
 import { Card } from '../components/ui/Card';
 import { AppHeader } from '../components/ui/AppHeader';
 import { PrimaryButton } from '../components/ui/PrimaryButton';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { SafeIcon } from '../components/ui/SafeIcon';
 import { format, isAfter, isBefore, startOfDay } from 'date-fns';
 
 type TaskFilter = 'all' | 'todo' | 'done' | 'overdue';
@@ -89,7 +89,7 @@ export const TasksScreen: React.FC = () => {
     }
   };
 
-  const getPriorityIcon = (priority: string) => {
+  const getPrioritySafeIcon = (priority: string) => {
     switch (priority) {
       case 'high': return 'alert-circle';
       case 'medium': return 'minus-circle';
@@ -104,7 +104,7 @@ export const TasksScreen: React.FC = () => {
         title="Tasks" 
         right={
           <TouchableOpacity onPress={() => setShowAddModal(true)}>
-            <Icon name="plus" size={24} color="#2E7D32" />
+            <SafeIcon name="plus" size={24} color="#2E7D32" />
           </TouchableOpacity>
         }
       />
@@ -135,8 +135,8 @@ export const TasksScreen: React.FC = () => {
                 </Text>
                 <View style={styles.taskMeta}>
                   <View style={styles.priorityContainer}>
-                    <Icon 
-                      name={getPriorityIcon(item.priority || 'medium')} 
+                    <SafeIcon 
+                      name={getPrioritySafeIcon(item.priority || 'medium')} 
                       size={16} 
                       color={getPriorityColor(item.priority || 'medium')} 
                     />
@@ -155,7 +155,7 @@ export const TasksScreen: React.FC = () => {
                 style={[styles.statusButton, item.status === 'done' && styles.statusButtonCompleted]}
                 onPress={() => toggleTaskStatus(item.id, item.status)}
               >
-                <Icon 
+                <SafeIcon 
                   name={item.status === 'done' ? 'check' : 'circle-outline'} 
                   size={24} 
                   color={item.status === 'done' ? '#2E7D32' : '#666'} 
@@ -168,7 +168,7 @@ export const TasksScreen: React.FC = () => {
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <View style={styles.emptyState}>
-            <Icon name="check-circle-outline" size={64} color="#ccc" />
+            <SafeIcon name="check-circle-outline" size={64} color="#ccc" />
             <Text style={styles.emptyText}>No tasks found</Text>
             <Text style={styles.emptySubtext}>
               {filter === 'all' ? 'Add your first task!' : `No ${filter} tasks`}
@@ -211,8 +211,8 @@ export const TasksScreen: React.FC = () => {
                     ]}
                     onPress={() => setNewTask(prev => ({ ...prev, priority }))}
                   >
-                    <Icon 
-                      name={getPriorityIcon(priority)} 
+                    <SafeIcon 
+                      name={getPrioritySafeIcon(priority)} 
                       size={20} 
                       color={newTask.priority === priority ? '#fff' : getPriorityColor(priority)} 
                     />

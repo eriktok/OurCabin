@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, Image } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { SafeIcon } from './ui/SafeIcon';
 import { useCabinApi } from '../services/ServiceProvider';
 import { Comment } from '../core/models';
 import { formatDistanceToNow } from 'date-fns';
@@ -65,7 +65,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({ postId, visibl
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={onClose}>
-          <Icon name="close" size={24} color="#666" />
+          <SafeIcon name="close" size={24} color="#666" />
         </TouchableOpacity>
         <Text style={styles.title}>Comments ({comments.length})</Text>
         <View style={{ width: 24 }} />
@@ -79,7 +79,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({ postId, visibl
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <View style={styles.emptyState}>
-            <Icon name="comment-outline" size={48} color="#ccc" />
+            <SafeIcon name="comment-outline" size={48} color="#ccc" />
             <Text style={styles.emptyText}>No comments yet</Text>
             <Text style={styles.emptySubtext}>Be the first to comment!</Text>
           </View>
@@ -100,7 +100,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({ postId, visibl
           onPress={handleSubmitComment}
           disabled={!newComment.trim() || isSubmitting}
         >
-          <Icon name="send" size={20} color={newComment.trim() ? "#2E7D32" : "#ccc"} />
+          <SafeIcon name="send" size={20} color={newComment.trim() ? "#2E7D32" : "#ccc"} />
         </TouchableOpacity>
       </View>
     </View>

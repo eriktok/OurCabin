@@ -1,21 +1,20 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-interface IconFallbackProps {
+interface SimpleIconProps {
   name: string;
   size?: number;
   color?: string;
   style?: any;
 }
 
-export const IconFallback: React.FC<IconFallbackProps> = ({ 
+export const SimpleIcon: React.FC<SimpleIconProps> = ({ 
   name, 
   size = 24, 
   color = '#666', 
   style 
 }) => {
-  // Fallback to text representation if icons don't load
-  const getTextIcon = (iconName: string) => {
+  const getIconSymbol = (iconName: string) => {
     const iconMap: Record<string, string> = {
       'home': '🏠',
       'account': '👤',
@@ -52,7 +51,6 @@ export const IconFallback: React.FC<IconFallbackProps> = ({
       'image': '🖼️',
       'post-outline': '📄',
       'book': '📖',
-      'calendar': '📅',
       'cabin': '🏠',
       'profile': '👤',
       'tasks': '✅',
@@ -66,8 +64,8 @@ export const IconFallback: React.FC<IconFallbackProps> = ({
 
   return (
     <View style={[styles.container, { width: size, height: size }, style]}>
-      <Text style={[styles.text, { fontSize: size * 0.6, color }]}>
-        {getTextIcon(name)}
+      <Text style={[styles.text, { fontSize: size * 0.7, color }]}>
+        {getIconSymbol(name)}
       </Text>
     </View>
   );

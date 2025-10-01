@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput, Image, Alert } from 'react-native';
 import { launchImageLibrary, ImagePickerResponse, MediaType } from 'react-native-image-picker';
 import { PrimaryButton } from './ui/PrimaryButton';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { SafeIcon } from './ui/SafeIcon';
 
 interface PostComposerModalProps {
   visible: boolean;
@@ -88,14 +88,14 @@ export const PostComposerModal: React.FC<PostComposerModalProps> = ({ visible, o
                 style={styles.removeImageButton}
                 onPress={() => setImageUri(null)}
               >
-                <Icon name="close" size={20} color="#fff" />
+                <SafeIcon name="close" size={20} color="#fff" />
               </TouchableOpacity>
             </View>
           )}
 
           <View style={styles.actions}>
             <TouchableOpacity style={styles.actionButton} onPress={handleImagePicker}>
-              <Icon name="image" size={24} color="#2E7D32" />
+              <SafeIcon name="image" size={24} color="#2E7D32" />
               <Text style={styles.actionText}>Photo</Text>
             </TouchableOpacity>
           </View>

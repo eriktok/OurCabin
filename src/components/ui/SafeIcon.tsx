@@ -1,6 +1,5 @@
 import React from 'react';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { IconFallback } from './IconFallback';
+import { SimpleIcon } from './SimpleIcon';
 
 interface SafeIconProps {
   name: string;
@@ -15,24 +14,14 @@ export const SafeIcon: React.FC<SafeIconProps> = ({
   color = '#666', 
   style 
 }) => {
-  try {
-    return (
-      <Icon 
-        name={name} 
-        size={size} 
-        color={color} 
-        style={style}
-      />
-    );
-  } catch (error) {
-    console.warn(`Icon ${name} failed to load, using fallback`);
-    return (
-      <IconFallback 
-        name={name} 
-        size={size} 
-        color={color} 
-        style={style}
-      />
-    );
-  }
+  // For now, let's just use SimpleIcon which provides beautiful emoji fallbacks
+  // This ensures the app works reliably without vector icon dependencies
+  return (
+    <SimpleIcon 
+      name={name} 
+      size={size} 
+      color={color} 
+      style={style}
+    />
+  );
 };
