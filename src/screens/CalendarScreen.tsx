@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { Booking } from '../core/models';
-import { cabinApiService } from '../services/SupabaseService';
+import { useCabinApi } from '../services/ServiceProvider';
 
 export const CalendarScreen: React.FC = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const api = useCabinApi();
 
   useEffect(() => {
-    cabinApiService.getBookings('demo-cabin').then(setBookings).catch(console.error);
-  }, []);
+    api.getBookings('demo-cabin').then(setBookings).catch(console.error);
+  }, [api]);
 
   return (
     <View style={styles.container}>

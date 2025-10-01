@@ -1,19 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TextInput, Button, StyleSheet } from 'react-native';
 import { Task } from '../core/models';
-import { cabinApiService } from '../services/SupabaseService';
+import { useCabinApi } from '../services/ServiceProvider';
 
 export const TasksScreen: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [title, setTitle] = useState('');
+  const api = useCabinApi();
 
   useEffect(() => {
-    cabinApiService.getTasks('demo-cabin').then(setTasks).catch(console.error);
-  }, []);
+    api.getTasks('demo-cabin').then(setTasks).catch(console.error);
+  }, [api]);
 
   const addTask = async () => {
     if (!title.trim()) return;
-    const task = await cabinApiService.createTask('demo-cabin', { title });
+    const task = await api.createTask('demo-cabin', { title });
     setTasks((t) => [task, ...t]);
     setTitle('');
   };
@@ -36,6 +37,14 @@ export const TasksScreen: React.FC = () => {
           <View style={styles.task}>
             <Text style={styles.taskTitle}>{item.title}</Text>
             <Text style={styles.meta}>{item.status.toUpperCase()}</Text>
+            <Button
+              title={item.status === 'done' ? 'Mark To Do' : 'Mark Done'}
+              onPress={async () => {
+                const next = item.status === 'done' ? 'todo' : 'done';
+                await api.updateTask(item.id, { status: next });
+                setTasks((prev) => prev.map((t) => (t.id === item.id ? { ...t, status: next } : t)));
+              }}
+            />
           </View>
         )}
         contentContainerStyle={styles.list}

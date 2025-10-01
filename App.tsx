@@ -15,6 +15,7 @@ import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { LogbookScreen } from './src/screens/LogbookScreen';
 import { TasksScreen } from './src/screens/TasksScreen';
 import { CalendarScreen } from './src/screens/CalendarScreen';
+import { ServiceProvider } from './src/services/ServiceProvider';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
@@ -33,22 +34,28 @@ function AppContent() {
   const [tab, setTab] = useState<'logbook' | 'tasks' | 'calendar'>('logbook');
 
   if (!hasOnboarded) {
-    return <OnboardingScreen onContinue={() => setHasOnboarded(true)} />;
+    return (
+      <ServiceProvider>
+        <OnboardingScreen onContinue={() => setHasOnboarded(true)} />
+      </ServiceProvider>
+    );
   }
 
   return (
-    <View style={styles.container}>
-      <View style={[styles.content, { paddingTop: safeAreaInsets.top }] }>
-        {tab === 'logbook' && <LogbookScreen />}
-        {tab === 'tasks' && <TasksScreen />}
-        {tab === 'calendar' && <CalendarScreen />}
+    <ServiceProvider>
+      <View style={styles.container}>
+        <View style={[styles.content, { paddingTop: safeAreaInsets.top }] }>
+          {tab === 'logbook' && <LogbookScreen />}
+          {tab === 'tasks' && <TasksScreen />}
+          {tab === 'calendar' && <CalendarScreen />}
+        </View>
+        <View style={[styles.tabBar, { paddingBottom: safeAreaInsets.bottom }] }>
+          <TabButton label="Logbook" active={tab === 'logbook'} onPress={() => setTab('logbook')} />
+          <TabButton label="Tasks" active={tab === 'tasks'} onPress={() => setTab('tasks')} />
+          <TabButton label="Calendar" active={tab === 'calendar'} onPress={() => setTab('calendar')} />
+        </View>
       </View>
-      <View style={[styles.tabBar, { paddingBottom: safeAreaInsets.bottom }] }>
-        <TabButton label="Logbook" active={tab === 'logbook'} onPress={() => setTab('logbook')} />
-        <TabButton label="Tasks" active={tab === 'tasks'} onPress={() => setTab('tasks')} />
-        <TabButton label="Calendar" active={tab === 'calendar'} onPress={() => setTab('calendar')} />
-      </View>
-    </View>
+    </ServiceProvider>
   );
 }
 

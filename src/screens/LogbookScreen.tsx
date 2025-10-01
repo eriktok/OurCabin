@@ -1,19 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TextInput, Button, StyleSheet } from 'react-native';
 import { Post } from '../core/models';
-import { cabinApiService } from '../services/SupabaseService';
+import { useCabinApi } from '../services/ServiceProvider';
 
 export const LogbookScreen: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [text, setText] = useState('');
+  const api = useCabinApi();
 
   useEffect(() => {
-    cabinApiService.getPosts('demo-cabin', 20).then(setPosts).catch(console.error);
-  }, []);
+    api.getPosts('demo-cabin', 20).then(setPosts).catch(console.error);
+  }, [api]);
 
   const submit = async () => {
     if (!text.trim()) return;
-    const created = await cabinApiService.createPost('demo-cabin', { text });
+    const created = await api.createPost('demo-cabin', { text });
     setPosts((p) => [created, ...p]);
     setText('');
   };
