@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Modal, ScrollView } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Modal, ScrollView, Alert } from 'react-native';
 import { Booking } from '../core/models';
 import { useCabinApi } from '../services/ServiceProvider';
 import { Card } from '../components/ui/Card';
 import { AppHeader } from '../components/ui/AppHeader';
 import { PrimaryButton } from '../components/ui/PrimaryButton';
 import { SafeIcon } from '../components/ui/SafeIcon';
+import { BookingConflictService, BookingConflict } from '../services/BookingConflictService';
 import { format, addDays, startOfDay, isAfter, isBefore } from 'date-fns';
 
 export const CalendarScreen: React.FC = () => {
@@ -15,7 +16,11 @@ export const CalendarScreen: React.FC = () => {
     startDate: new Date(),
     endDate: addDays(new Date(), 2),
   });
+  const [conflicts, setConflicts] = useState<BookingConflict[]>([]);
+  const [isCheckingConflicts, setIsCheckingConflicts] = useState(false);
+  const [alternativeDates, setAlternativeDates] = useState<{ startDate: string; endDate: string; daysDiff: number }[]>([]);
   const api = useCabinApi();
+  const conflictService = BookingConflictService.getInstance();
 
   useEffect(() => {
     loadBookings();
@@ -30,16 +35,66 @@ export const CalendarScreen: React.FC = () => {
     }
   };
 
+  const checkConflicts = async () => {
+    setIsCheckingConflicts(true);
+    try {
+      const detectedConflicts = await conflictService.checkConflicts(
+        'demo-cabin',
+        newBooking.startDate.toISOString(),
+        newBooking.endDate.toISOString()
+      );
+      setConflicts(detectedConflicts);
+
+      if (detectedConflicts.some(c => c.severity === 'error')) {
+        // Get alternative dates
+        const alternatives = await conflictService.suggestAlternativeDates(
+          'demo-cabin',
+          newBooking.startDate.toISOString(),
+          newBooking.endDate.toISOString()
+        );
+        setAlternativeDates(alternatives);
+      }
+    } catch (error) {
+      console.error('Failed to check conflicts:', error);
+    } finally {
+      setIsCheckingConflicts(false);
+    }
+  };
+
   const requestBooking = async () => {
     try {
+      // Check for conflicts first
+      const detectedConflicts = await conflictService.checkConflicts(
+        'demo-cabin',
+        newBooking.startDate.toISOString(),
+        newBooking.endDate.toISOString()
+      );
+
+      const hasErrors = detectedConflicts.some(c => c.severity === 'error');
+      
+      if (hasErrors) {
+        Alert.alert(
+          'Booking Conflict',
+          'This booking conflicts with existing reservations. Please choose different dates.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Check Alternatives', onPress: checkConflicts },
+          ]
+        );
+        return;
+      }
+
       const created = await api.requestBooking('demo-cabin', {
         startDate: newBooking.startDate.toISOString(),
         endDate: newBooking.endDate.toISOString(),
       });
       setBookings(prev => [created, ...prev]);
       setShowRequestModal(false);
+      setConflicts([]);
+      setAlternativeDates([]);
     } catch (error) {
       console.error('Failed to request booking:', error);
+      Alert.alert('Error', 'Failed to create booking request. Please try again.');
     }
   };
 
@@ -190,6 +245,65 @@ export const CalendarScreen: React.FC = () => {
                 {Math.ceil((newBooking.endDate.getTime() - newBooking.startDate.getTime()) / (1000 * 60 * 60 * 24))} nights
               </Text>
             </View>
+
+            {/* Conflict Detection */}
+            <TouchableOpacity 
+              style={styles.checkConflictsButton} 
+              onPress={checkConflicts}
+              disabled={isCheckingConflicts}
+            >
+              <SafeIcon name="shield-check" size={20} color="#2E7D32" />
+              <Text style={styles.checkConflictsText}>
+                {isCheckingConflicts ? 'Checking...' : 'Check for Conflicts'}
+              </Text>
+            </TouchableOpacity>
+
+            {/* Display Conflicts */}
+            {conflicts.length > 0 && (
+              <View style={styles.conflictsContainer}>
+                <Text style={styles.conflictsTitle}>⚠️ Booking Conflicts Detected</Text>
+                {conflicts.map((conflict, index) => (
+                  <View key={index} style={[
+                    styles.conflictItem,
+                    conflict.severity === 'error' ? styles.conflictError : styles.conflictWarning
+                  ]}>
+                    <SafeIcon 
+                      name={conflict.severity === 'error' ? 'alert-circle' : 'alert'} 
+                      size={16} 
+                      color={conflict.severity === 'error' ? '#D32F2F' : '#FF9800'} 
+                    />
+                    <Text style={styles.conflictText}>{conflict.message}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+
+            {/* Alternative Dates */}
+            {alternativeDates.length > 0 && (
+              <View style={styles.alternativesContainer}>
+                <Text style={styles.alternativesTitle}>💡 Suggested Alternative Dates</Text>
+                {alternativeDates.slice(0, 3).map((alt, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={styles.alternativeItem}
+                    onPress={() => {
+                      setNewBooking({
+                        startDate: new Date(alt.startDate),
+                        endDate: new Date(alt.endDate),
+                      });
+                      setConflicts([]);
+                      setAlternativeDates([]);
+                    }}
+                  >
+                    <SafeIcon name="calendar-check" size={16} color="#2E7D32" />
+                    <Text style={styles.alternativeText}>
+                      {format(new Date(alt.startDate), 'MMM dd')} - {format(new Date(alt.endDate), 'MMM dd, yyyy')}
+                      {alt.daysDiff > 0 && ` (${alt.daysDiff} days ${alt.startDate < newBooking.startDate.toISOString() ? 'earlier' : 'later'})`}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
           </View>
         </View>
       </Modal>
@@ -351,6 +465,89 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   summaryText: {
+    fontSize: 14,
+    color: '#2E7D32',
+    fontWeight: '500',
+  },
+  checkConflictsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#E8F5E9',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginVertical: 16,
+    gap: 8,
+  },
+  checkConflictsText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#2E7D32',
+  },
+  conflictsContainer: {
+    backgroundColor: '#FFF3E0',
+    borderRadius: 8,
+    padding: 16,
+    marginVertical: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: '#FF9800',
+  },
+  conflictsTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#E65100',
+    marginBottom: 12,
+  },
+  conflictItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    marginBottom: 8,
+    gap: 8,
+  },
+  conflictError: {
+    backgroundColor: '#FFEBEE',
+  },
+  conflictWarning: {
+    backgroundColor: '#FFF8E1',
+  },
+  conflictText: {
+    flex: 1,
+    fontSize: 14,
+    color: '#424242',
+    lineHeight: 20,
+  },
+  alternativesContainer: {
+    backgroundColor: '#E8F5E9',
+    borderRadius: 8,
+    padding: 16,
+    marginVertical: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: '#2E7D32',
+  },
+  alternativesTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1B5E20',
+    marginBottom: 12,
+  },
+  alternativeItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginBottom: 8,
+    gap: 12,
+    borderWidth: 1,
+    borderColor: '#C8E6C9',
+  },
+  alternativeText: {
+    flex: 1,
     fontSize: 14,
     color: '#2E7D32',
     fontWeight: '500',

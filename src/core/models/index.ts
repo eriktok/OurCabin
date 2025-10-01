@@ -29,6 +29,10 @@ export interface Task {
   title: string;
   description?: string;
   status: 'todo' | 'in_progress' | 'done';
+  priority?: 'low' | 'medium' | 'high';
+  dueDate?: string;
+  assignedTo?: Identifier;
+  assignedToName?: string;
   createdAt: string;
   completedAt?: string;
 }

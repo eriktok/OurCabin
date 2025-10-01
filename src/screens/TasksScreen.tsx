@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TextInput, StyleSheet, TouchableOpacity, Modal, ScrollView } from 'react-native';
-import { Task } from '../core/models';
+import { View, Text, FlatList, TextInput, StyleSheet, TouchableOpacity, Modal, ScrollView, Alert } from 'react-native';
+import { Task, User } from '../core/models';
 import { useCabinApi } from '../services/ServiceProvider';
 import { Card } from '../components/ui/Card';
 import { AppHeader } from '../components/ui/AppHeader';
 import { PrimaryButton } from '../components/ui/PrimaryButton';
 import { SafeIcon } from '../components/ui/SafeIcon';
-import { format, isAfter, isBefore, startOfDay } from 'date-fns';
+import { NotificationService } from '../services/NotificationService';
+import { format, isAfter, isBefore, startOfDay, differenceInDays } from 'date-fns';
 
 type TaskFilter = 'all' | 'todo' | 'done' | 'overdue';
 type TaskPriority = 'low' | 'medium' | 'high';
@@ -19,12 +20,24 @@ export const TasksScreen: React.FC = () => {
     title: '',
     priority: 'medium' as TaskPriority,
     dueDate: null as Date | null,
+    assignedTo: null as string | null,
   });
+  const [cabinMembers, setCabinMembers] = useState<User[]>([]);
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const api = useCabinApi();
 
   useEffect(() => {
     loadTasks();
+    loadCabinMembers();
+    checkOverdueTasks();
   }, []);
+
+  // Check for overdue tasks and send notifications
+  useEffect(() => {
+    const interval = setInterval(checkOverdueTasks, 60000); // Check every minute
+    return () => clearInterval(interval);
+  }, [tasks]);
 
   const loadTasks = async () => {
     try {
@@ -32,6 +45,35 @@ export const TasksScreen: React.FC = () => {
       setTasks(allTasks);
     } catch (error) {
       console.error('Failed to load tasks:', error);
+    }
+  };
+
+  const loadCabinMembers = async () => {
+    try {
+      // In a real app, this would fetch cabin members
+      // For now, we'll use demo members
+      const members: User[] = [
+        { id: 'user1', displayName: 'John Doe', email: 'john@example.com', photoUrl: null },
+        { id: 'user2', displayName: 'Jane Smith', email: 'jane@example.com', photoUrl: null },
+        { id: 'user3', displayName: 'Bob Johnson', email: 'bob@example.com', photoUrl: null },
+      ];
+      setCabinMembers(members);
+    } catch (error) {
+      console.error('Failed to load cabin members:', error);
+    }
+  };
+
+  const checkOverdueTasks = () => {
+    const now = new Date();
+    const overdueTasks = tasks.filter(task => 
+      task.status === 'todo' && 
+      task.dueDate && 
+      isBefore(new Date(task.dueDate), now)
+    );
+
+    if (overdueTasks.length > 0) {
+      // Send notification for overdue tasks
+      NotificationService.showTaskOverdueNotification(overdueTasks.length);
     }
   };
 
@@ -43,13 +85,49 @@ export const TasksScreen: React.FC = () => {
         title: newTask.title,
         priority: newTask.priority,
         dueDate: newTask.dueDate,
+        assignedTo: newTask.assignedTo,
       });
       setTasks(prev => [task, ...prev]);
-      setNewTask({ title: '', priority: 'medium', dueDate: null });
+      
+      // Send notification to assigned user
+      if (newTask.assignedTo) {
+        const assignedUser = cabinMembers.find(m => m.id === newTask.assignedTo);
+        if (assignedUser) {
+          NotificationService.showTaskAssignedNotification(task.title, assignedUser.displayName);
+        }
+      }
+      
+      setNewTask({ title: '', priority: 'medium', dueDate: null, assignedTo: null });
       setShowAddModal(false);
     } catch (error) {
       console.error('Failed to create task:', error);
     }
+  };
+
+  const assignTask = async (taskId: string, userId: string) => {
+    try {
+      await api.assignTask(taskId, userId);
+      setTasks(prev => prev.map(task => 
+        task.id === taskId ? { ...task, assignedTo: userId } : task
+      ));
+      
+      const assignedUser = cabinMembers.find(m => m.id === userId);
+      const task = tasks.find(t => t.id === taskId);
+      if (assignedUser && task) {
+        NotificationService.showTaskAssignedNotification(task.title, assignedUser.displayName);
+      }
+      
+      setShowAssignModal(false);
+      setSelectedTask(null);
+    } catch (error) {
+      console.error('Failed to assign task:', error);
+      Alert.alert('Error', 'Failed to assign task. Please try again.');
+    }
+  };
+
+  const openAssignModal = (task: Task) => {
+    setSelectedTask(task);
+    setShowAssignModal(true);
   };
 
   const toggleTaskStatus = async (taskId: string, currentStatus: string) => {

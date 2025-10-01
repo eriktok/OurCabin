@@ -329,9 +329,168 @@ export class RealSupabaseService implements ICabinApiService {
   }
 
   async generateInviteCode(cabinId: string): Promise<string> {
-    // This would generate a real invite code and store it
-    // For now, return a demo code
-    return 'INVITE-' + cabinId.slice(0, 4).toUpperCase();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    // Check if user is cabin owner
+    const { data: cabin, error: cabinError } = await supabase
+      .from('cabins')
+      .select('created_by')
+      .eq('id', cabinId)
+      .single();
+
+    if (cabinError) throw cabinError;
+    if (cabin.created_by !== user.id) throw new Error('Only cabin owners can generate invite codes');
+
+    // Generate a unique invite code
+    const inviteCode = 'INVITE-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+    
+    // Store the invite code
+    const { error } = await supabase
+      .from('invite_codes')
+      .insert({
+        cabin_id: cabinId,
+        code: inviteCode,
+        created_by: user.id,
+        expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days
+      });
+
+    if (error) throw error;
+    return inviteCode;
+  }
+
+  async getInviteCodeDetails(inviteCode: string): Promise<{ cabinId: string; cabinName: string; expiresAt: string } | null> {
+    const { data, error } = await supabase
+      .from('invite_codes')
+      .select(`
+        cabin_id,
+        expires_at,
+        cabins!inner(name)
+      `)
+      .eq('code', inviteCode)
+      .gt('expires_at', new Date().toISOString())
+      .single();
+
+    if (error || !data) return null;
+
+    return {
+      cabinId: data.cabin_id,
+      cabinName: data.cabins.name,
+      expiresAt: data.expires_at,
+    };
+  }
+
+  async deleteInviteCode(inviteCode: string): Promise<void> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    const { error } = await supabase
+      .from('invite_codes')
+      .delete()
+      .eq('code', inviteCode)
+      .eq('created_by', user.id);
+
+    if (error) throw error;
+  }
+
+  async rejectBooking(bookingId: string): Promise<void> {
+    const { error } = await supabase
+      .from('bookings')
+      .update({ status: 'rejected' })
+      .eq('id', bookingId);
+
+    if (error) throw error;
+  }
+
+  async getCabins(): Promise<Cabin[]> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    const { data, error } = await supabase
+      .from('cabins')
+      .select('*')
+      .eq('created_by', user.id);
+
+    if (error) throw error;
+
+    return (data || []).map(cabin => ({
+      id: cabin.id,
+      name: cabin.name,
+      photoUrl: cabin.photo_url,
+    }));
+  }
+
+  async createCabin(name: string): Promise<Cabin> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    const { data, error } = await supabase
+      .from('cabins')
+      .insert({
+        name,
+        created_by: user.id,
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return {
+      id: data.id,
+      name: data.name,
+      photoUrl: data.photo_url,
+    };
+  }
+
+  async joinCabin(inviteCode: string): Promise<Cabin> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    // Get invite code details
+    const inviteDetails = await this.getInviteCodeDetails(inviteCode);
+    if (!inviteDetails) throw new Error('Invalid or expired invite code');
+
+    // Add user to cabin (this would need a cabin_members table)
+    const { error } = await supabase
+      .from('cabin_members')
+      .insert({
+        cabin_id: inviteDetails.cabinId,
+        user_id: user.id,
+        role: 'member',
+      });
+
+    if (error) throw error;
+
+    return {
+      id: inviteDetails.cabinId,
+      name: inviteDetails.cabinName,
+      photoUrl: null,
+    };
+  }
+
+  async createComment(postId: string, text: string): Promise<Comment> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    const { data, error } = await supabase
+      .from('comments')
+      .insert({
+        post_id: postId,
+        author_id: user.id,
+        text,
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return {
+      id: data.id,
+      postId: data.post_id,
+      authorId: data.author_id,
+      text: data.text,
+      createdAt: data.created_at,
+    };
   }
 }
 
