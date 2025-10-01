@@ -96,58 +96,64 @@ Storage: Supabase Storage for hosting all user-uploaded images securely.
 4. The Repository Pattern Implementation
    The core of the architecture is the API Service Interface. This contract will define all possible data operations, making the application backend-agnostic.
 
-src/core/services/ICabinApiService.ts (The Interface - Unchanged)
+`src/core/services/ICabinApiService.ts` (The Interface — Unchanged)
 
-TypeScript
-
+```typescript
 // Defines the contract for any data source implementation
 // Models
 import { User, Task, Post, Booking } from '../models';
 
 export interface ICabinApiService {
-// Auth
-signInWithGoogle(): Promise<User>;
-signInWithVipps(): Promise<User>;
-signOut(): Promise<void>;
-onAuthStateChanged(callback: (user: User | null) => void): () => void; // Unsubscribe function
+  // Auth
+  signInWithGoogle(): Promise<User>;
+  signInWithVipps(): Promise<User>;
+  signOut(): Promise<void>;
+  onAuthStateChanged(callback: (user: User | null) => void): () => void; // Unsubscribe function
 
-// Posts (Logbook)
-getPosts(cabinId: string, limit: number): Promise<Post[]>;
-createPost(cabinId: string, postData: { text: string; imageUrls?: string[] }): Promise<Post>;
+  // Posts (Logbook)
+  getPosts(cabinId: string, limit: number): Promise<Post[]>;
+  createPost(
+    cabinId: string,
+    postData: { text: string; imageUrls?: string[] }
+  ): Promise<Post>;
 
-// Tasks
-getTasks(cabinId: string): Promise<Task[]>;
-createTask(cabinId: string, taskData: { title: string; description?: string }): Promise<Task>;
-updateTask(taskId: string, updates: Partial<Task>): Promise<void>;
+  // Tasks
+  getTasks(cabinId: string): Promise<Task[]>;
+  createTask(
+    cabinId: string,
+    taskData: { title: string; description?: string }
+  ): Promise<Task>;
+  updateTask(taskId: string, updates: Partial<Task>): Promise<void>;
 }
-src/services/SupabaseService.ts (The Concrete Implementation - Updated)
+```
 
-TypeScript
+`src/services/SupabaseService.ts` (The Concrete Implementation — Updated)
 
+```typescript
 import { ICabinApiService } from '../core/services/ICabinApiService';
 import { supabase } from '../supabaseClient'; // Assumes a configured Supabase client
-import { Post } from '../core/models';
+import { Post, Task, User } from '../core/models';
 
 export class SupabaseService implements ICabinApiService {
-async getPosts(cabinId: string, limit: number): Promise<Post[]> {
-const { data, error } = await supabase
-.from('posts') // Assumes a 'posts' table
-.select('\*')
-.eq('cabin_id', cabinId) // Assumes a foreign key linking posts to cabins
-.order('created_at', { ascending: false })
-.limit(limit);
+  async getPosts(cabinId: string, limit: number): Promise<Post[]> {
+    const { data, error } = await supabase
+      .from('posts') // Assumes a 'posts' table
+      .select('*')
+      .eq('cabin_id', cabinId)
+      .order('created_at', { ascending: false })
+      .limit(limit);
 
     if (error) {
-      console.error("Error fetching posts:", error.message);
+      console.error('Error fetching posts:', error.message);
       throw error;
     }
 
     return data || [];
+  }
 
+  // ... implement remaining ICabinApiService methods
 }
-
-// ... implement all other methods from the interface using the Supabase client
-}
+```
 The React components will only ever interact with ICabinApiService, never directly with SupabaseService.
 
 ## Non-Functional Requirements

@@ -1,0 +1,95 @@
+import { ICabinApiService } from '../core/services/ICabinApiService';
+import { Booking, Post, Task, User } from '../core/models';
+
+export class SupabaseService implements ICabinApiService {
+  // Auth (stubs)
+  async signInWithGoogle(): Promise<User> {
+    return { id: 'demo', displayName: 'Demo User' };
+  }
+  async signInWithVipps(): Promise<User> {
+    return { id: 'demo', displayName: 'Demo User' };
+  }
+  async signOut(): Promise<void> {
+    return;
+  }
+  onAuthStateChanged(callback: (user: User | null) => void): () => void {
+    callback({ id: 'demo', displayName: 'Demo User' });
+    return () => undefined;
+  }
+
+  // Posts
+  async getPosts(cabinId: string, limit: number): Promise<Post[]> {
+    return [
+      {
+        id: 'p1',
+        cabinId,
+        authorId: 'demo',
+        text: 'Welcome to Our Cabin! 🏡',
+        createdAt: new Date().toISOString(),
+      },
+    ];
+  }
+  async createPost(
+    cabinId: string,
+    postData: { text: string; imageUrls?: string[] }
+  ): Promise<Post> {
+    return {
+      id: Math.random().toString(36).slice(2),
+      cabinId,
+      authorId: 'demo',
+      text: postData.text,
+      imageUrls: postData.imageUrls,
+      createdAt: new Date().toISOString(),
+    };
+  }
+
+  // Tasks
+  async getTasks(cabinId: string): Promise<Task[]> {
+    return [
+      {
+        id: 't1',
+        cabinId,
+        title: 'Restock firewood',
+        status: 'todo',
+        createdAt: new Date().toISOString(),
+      },
+    ];
+  }
+  async createTask(
+    cabinId: string,
+    taskData: { title: string; description?: string }
+  ): Promise<Task> {
+    return {
+      id: Math.random().toString(36).slice(2),
+      cabinId,
+      title: taskData.title,
+      description: taskData.description,
+      status: 'todo',
+      createdAt: new Date().toISOString(),
+    };
+  }
+  async updateTask(taskId: string, updates: Partial<Task>): Promise<void> {
+    return;
+  }
+
+  // Bookings
+  async getBookings(cabinId: string): Promise<Booking[]> {
+    const today = new Date();
+    const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const end = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 2);
+    return [
+      {
+        id: 'b1',
+        cabinId,
+        userId: 'demo',
+        startDate: start.toISOString(),
+        endDate: end.toISOString(),
+        createdAt: today.toISOString(),
+      },
+    ];
+  }
+}
+
+export const cabinApiService: ICabinApiService = new SupabaseService();
+
+
