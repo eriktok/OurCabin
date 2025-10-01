@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput, Image, Alert } from 'react-native';
+import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput, Image, Alert, ActivityIndicator } from 'react-native';
 import { launchImageLibrary, ImagePickerResponse, MediaType } from 'react-native-image-picker';
 import { PrimaryButton } from './ui/PrimaryButton';
 import { SafeIcon } from './ui/SafeIcon';
+import { ImageUploadService } from '../services/ImageUploadService';
 
 interface PostComposerModalProps {
   visible: boolean;
@@ -14,6 +15,8 @@ export const PostComposerModal: React.FC<PostComposerModalProps> = ({ visible, o
   const [content, setContent] = useState('');
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const imageUploadService = ImageUploadService.getInstance();
 
   const handleImagePicker = () => {
     const options = {
@@ -37,7 +40,21 @@ export const PostComposerModal: React.FC<PostComposerModalProps> = ({ visible, o
 
     setIsSubmitting(true);
     try {
-      await onSubmit(content.trim(), imageUri || undefined);
+      let uploadedImageUrl: string | undefined;
+      
+      if (imageUri) {
+        setIsUploading(true);
+        try {
+          uploadedImageUrl = await imageUploadService.uploadImage(imageUri);
+        } catch (error) {
+          console.error('Image upload error:', error);
+          Alert.alert('Upload Failed', 'Failed to upload image. Post will be created without image.');
+        } finally {
+          setIsUploading(false);
+        }
+      }
+
+      await onSubmit(content.trim(), uploadedImageUrl);
       setContent('');
       setImageUri(null);
       onClose();
@@ -63,9 +80,9 @@ export const PostComposerModal: React.FC<PostComposerModalProps> = ({ visible, o
           </TouchableOpacity>
           <Text style={styles.title}>New Post</Text>
           <PrimaryButton
-            title="Post"
+            title={isUploading ? "Uploading..." : "Post"}
             onPress={handleSubmit}
-            loading={isSubmitting}
+            loading={isSubmitting || isUploading}
             style={styles.postButton}
           />
         </View>

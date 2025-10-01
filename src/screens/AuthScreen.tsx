@@ -1,6 +1,12 @@
-import React from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { useCabinApi } from '../services/ServiceProvider';
+import { useAppStore } from '../stores/appStore';
+import { Card } from '../components/ui/Card';
+import { AppHeader } from '../components/ui/AppHeader';
+import { PrimaryButton } from '../components/ui/PrimaryButton';
+import { SafeIcon } from '../components/ui/SafeIcon';
+import { AuthService } from '../services/AuthService';
 
 interface Props {
   onSignedIn: () => void;
@@ -8,24 +14,114 @@ interface Props {
 
 export const AuthScreen: React.FC<Props> = ({ onSignedIn }) => {
   const api = useCabinApi();
+  const { setCurrentUser } = useAppStore();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
+  const authService = AuthService.getInstance();
 
-  const signInGoogle = async () => {
-    await api.signInWithGoogle();
-    onSignedIn();
+  useEffect(() => {
+    initializeAuth();
+  }, []);
+
+  const initializeAuth = async () => {
+    try {
+      await authService.initialize();
+      
+      // Check if user is already signed in
+      const user = await authService.getCurrentUser();
+      if (user) {
+        setCurrentUser(user);
+        onSignedIn();
+      }
+    } catch (error) {
+      console.error('Auth initialization error:', error);
+    } finally {
+      setIsInitializing(false);
+    }
   };
-  const signInVipps = async () => {
-    await api.signInWithVipps();
-    onSignedIn();
+
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true);
+    try {
+      const user = await authService.signInWithGoogle();
+      setCurrentUser(user);
+      onSignedIn();
+    } catch (error: any) {
+      console.error('Google sign-in error:', error);
+      Alert.alert('Sign-in Failed', error.message || 'Unable to sign in with Google. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  const handleVippsSignIn = async () => {
+    setIsLoading(true);
+    try {
+      const user = await authService.signInWithVipps();
+      setCurrentUser(user);
+      onSignedIn();
+    } catch (error: any) {
+      console.error('Vipps sign-in error:', error);
+      Alert.alert('Sign-in Failed', error.message || 'Unable to sign in with Vipps. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isInitializing) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#2E7D32" />
+          <Text style={styles.loadingText}>Initializing...</Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Sign in</Text>
-      <View style={styles.actions}>
-        <Button title="Continue with Google" onPress={signInGoogle} />
-      </View>
-      <View style={styles.actions}>
-        <Button title="Continue with Vipps" onPress={signInVipps} />
+      <AppHeader title="Welcome to OurCabin" />
+      
+      <View style={styles.content}>
+        <Card>
+          <View style={styles.welcomeSection}>
+            <SafeIcon name="home" size={64} color="#2E7D32" />
+            <Text style={styles.welcomeTitle}>Welcome to OurCabin</Text>
+            <Text style={styles.welcomeSubtitle}>
+              Connect with your cabin community and share memories together
+            </Text>
+          </View>
+        </Card>
+
+        <Card>
+          <Text style={styles.signInTitle}>Sign in to continue</Text>
+          
+          <PrimaryButton
+            title="Continue with Google"
+            onPress={handleGoogleSignIn}
+            loading={isLoading}
+            style={styles.signInButton}
+            icon={<SafeIcon name="google" size={20} color="#fff" />}
+          />
+
+          <TouchableOpacity
+            style={[styles.signInButton, styles.vippsButton]}
+            onPress={handleVippsSignIn}
+            disabled={isLoading}
+          >
+            <SafeIcon name="phone" size={20} color="#fff" />
+            <Text style={styles.signInButtonText}>
+              {isLoading ? 'Signing in...' : 'Continue with Vipps'}
+            </Text>
+          </TouchableOpacity>
+        </Card>
+
+        <Card>
+          <Text style={styles.privacyText}>
+            By signing in, you agree to our Terms of Service and Privacy Policy
+          </Text>
+        </Card>
       </View>
     </View>
   );
@@ -34,29 +130,70 @@ export const AuthScreen: React.FC<Props> = ({ onSignedIn }) => {
 const styles = StyleSheet.create({
   container: { 
     flex: 1, 
-    alignItems: 'center', 
-    justifyContent: 'center', 
-    padding: 24,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#F7F8FA',
   },
-  title: { 
-    fontSize: 32, 
-    fontWeight: '700', 
-    marginBottom: 24,
-    color: '#2c3e50',
+  content: {
+    flex: 1,
+    padding: 16,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#666',
+  },
+  welcomeSection: {
+    alignItems: 'center',
+    paddingVertical: 24,
+  },
+  welcomeTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#1A1F2C',
+    marginTop: 16,
+    marginBottom: 8,
     textAlign: 'center',
   },
-  actions: { 
-    width: '80%', 
-    marginVertical: 8,
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+  welcomeSubtitle: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+  signInTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1A1F2C',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  signInButton: {
+    marginBottom: 12,
+  },
+  vippsButton: {
+    backgroundColor: '#5B2C6F',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    gap: 8,
+  },
+  signInButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  privacyText: {
+    fontSize: 12,
+    color: '#666',
+    textAlign: 'center',
+    lineHeight: 18,
   },
 });
 

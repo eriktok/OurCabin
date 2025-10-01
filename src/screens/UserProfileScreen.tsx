@@ -5,11 +5,13 @@ import { useCabinApi } from '../services/ServiceProvider';
 import { Card } from '../components/ui/Card';
 import { AppHeader } from '../components/ui/AppHeader';
 import { SafeIcon } from '../components/ui/SafeIcon';
+import { EditProfileModal } from '../components/EditProfileModal';
 
 export const UserProfileScreen: React.FC = () => {
   const { currentUser, selectedCabin, setCurrentUser } = useAppStore();
   const api = useCabinApi();
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [showEditProfile, setShowEditProfile] = useState(false);
 
   const handleSignOut = async () => {
     Alert.alert(
@@ -35,6 +37,19 @@ export const UserProfileScreen: React.FC = () => {
         },
       ]
     );
+  };
+
+  const handleSaveProfile = async (updatedUser: Partial<User>) => {
+    try {
+      // Update the user in the store
+      if (currentUser) {
+        const newUser = { ...currentUser, ...updatedUser };
+        setCurrentUser(newUser);
+      }
+    } catch (error) {
+      console.error('Save profile error:', error);
+      throw error;
+    }
   };
 
   if (!currentUser) {
@@ -104,7 +119,7 @@ export const UserProfileScreen: React.FC = () => {
           
           <TouchableOpacity 
             style={styles.settingItem} 
-            onPress={() => Alert.alert('Coming Soon', 'Profile editing will be available soon')}
+            onPress={() => setShowEditProfile(true)}
           >
             <View style={styles.settingInfo}>
               <SafeIcon name="pencil" size={20} color="#666" />
@@ -189,6 +204,12 @@ export const UserProfileScreen: React.FC = () => {
           </TouchableOpacity>
         </Card>
       </ScrollView>
+
+      <EditProfileModal
+        visible={showEditProfile}
+        onClose={() => setShowEditProfile(false)}
+        onSave={handleSaveProfile}
+      />
     </View>
   );
 };

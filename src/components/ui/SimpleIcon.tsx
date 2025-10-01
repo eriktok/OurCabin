@@ -57,6 +57,10 @@ export const SimpleIcon: React.FC<SimpleIconProps> = ({
       'logbook': '📖',
       'home-outline': '🏠',
       'account-circle': '👤',
+      'google': '🔍',
+      'phone': '📱',
+      'camera': '📷',
+      'magnify': '🔍',
     };
     
     return iconMap[iconName] || '?';

@@ -9,10 +9,13 @@ import { CommentsSection } from '../components/CommentsSection';
 import { Card } from '../components/ui/Card';
 import { AppHeader } from '../components/ui/AppHeader';
 import { SafeIcon } from '../components/ui/SafeIcon';
+import { SearchBar } from '../components/ui/SearchBar';
 import { formatDistanceToNow } from 'date-fns';
 
 export const LogbookScreen: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([]);
+  const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [showComposer, setShowComposer] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
@@ -22,6 +25,23 @@ export const LogbookScreen: React.FC = () => {
   useEffect(() => {
     loadPosts();
   }, []);
+
+  useEffect(() => {
+    filterPosts();
+  }, [posts, searchQuery]);
+
+  const filterPosts = () => {
+    if (!searchQuery.trim()) {
+      setFilteredPosts(posts);
+      return;
+    }
+
+    const filtered = posts.filter(post =>
+      post.text.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      post.authorName.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredPosts(filtered);
+  };
 
   const loadPosts = () => {
     execute(() => api.getPosts('demo-cabin', 20))
@@ -90,8 +110,16 @@ export const LogbookScreen: React.FC = () => {
         }
       />
       
+      <SearchBar
+        placeholder="Search posts..."
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+        onClear={() => setSearchQuery('')}
+        style={styles.searchBar}
+      />
+
       <FlatList
-        data={posts}
+        data={filteredPosts}
         keyExtractor={(p) => p.id}
         renderItem={({ item }) => (
           <Card>
@@ -169,6 +197,10 @@ const styles = StyleSheet.create({
   },
   list: { 
     paddingBottom: 16 
+  },
+  searchBar: {
+    marginHorizontal: 16,
+    marginBottom: 12,
   },
   postHeader: {
     flexDirection: 'row',
