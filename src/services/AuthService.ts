@@ -1,10 +1,12 @@
-import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import * as Keychain from 'react-native-keychain';
 import { User } from '../core/models';
+import { FallbackAuthService } from './FallbackAuthService';
 
 export class AuthService {
   private static instance: AuthService;
   private currentUser: User | null = null;
+  private fallbackService: FallbackAuthService;
+  private useFallback: boolean = false;
 
   static getInstance(): AuthService {
     if (!AuthService.instance) {
@@ -13,8 +15,15 @@ export class AuthService {
     return AuthService.instance;
   }
 
+  constructor() {
+    this.fallbackService = FallbackAuthService.getInstance();
+  }
+
   async initialize(): Promise<void> {
     try {
+      // Try to dynamically import GoogleSignin
+      const { GoogleSignin } = await import('@react-native-google-signin/google-signin');
+      
       GoogleSignin.configure({
         webClientId: process.env.GOOGLE_WEB_CLIENT_ID,
         offlineAccess: true,
@@ -22,12 +31,20 @@ export class AuthService {
         forceCodeForRefreshToken: true,
       });
     } catch (error) {
-      console.error('Failed to initialize Google Sign-In:', error);
+      console.warn('Google Sign-In module not available, using fallback:', error);
+      this.useFallback = true;
+      await this.fallbackService.initialize();
     }
   }
 
   async signInWithGoogle(): Promise<User> {
+    if (this.useFallback) {
+      return this.fallbackService.signInWithGoogle();
+    }
+
     try {
+      const { GoogleSignin, statusCodes } = await import('@react-native-google-signin/google-signin');
+      
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
       
@@ -45,11 +62,11 @@ export class AuthService {
       
       return user;
     } catch (error: any) {
-      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+      if (error.code === 'SIGN_IN_CANCELLED') {
         throw new Error('Sign-in was cancelled');
-      } else if (error.code === statusCodes.IN_PROGRESS) {
+      } else if (error.code === 'IN_PROGRESS') {
         throw new Error('Sign-in is already in progress');
-      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+      } else if (error.code === 'PLAY_SERVICES_NOT_AVAILABLE') {
         throw new Error('Google Play Services not available');
       } else {
         throw new Error('Google sign-in failed: ' + error.message);
@@ -58,6 +75,10 @@ export class AuthService {
   }
 
   async signInWithVipps(): Promise<User> {
+    if (this.useFallback) {
+      return this.fallbackService.signInWithVipps();
+    }
+
     // Vipps integration would go here
     // For now, return a mock user
     const user: User = {
@@ -74,7 +95,12 @@ export class AuthService {
   }
 
   async signOut(): Promise<void> {
+    if (this.useFallback) {
+      return this.fallbackService.signOut();
+    }
+
     try {
+      const { GoogleSignin } = await import('@react-native-google-signin/google-signin');
       await GoogleSignin.signOut();
     } catch (error) {
       console.error('Google sign-out error:', error);
@@ -85,6 +111,10 @@ export class AuthService {
   }
 
   async getCurrentUser(): Promise<User | null> {
+    if (this.useFallback) {
+      return this.fallbackService.getCurrentUser();
+    }
+
     if (this.currentUser) {
       return this.currentUser;
     }
@@ -104,7 +134,12 @@ export class AuthService {
   }
 
   async isSignedIn(): Promise<boolean> {
+    if (this.useFallback) {
+      return this.fallbackService.isSignedIn();
+    }
+
     try {
+      const { GoogleSignin } = await import('@react-native-google-signin/google-signin');
       const isSignedIn = await GoogleSignin.isSignedIn();
       return isSignedIn;
     } catch (error) {

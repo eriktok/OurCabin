@@ -6,10 +6,11 @@ import { Card } from '../components/ui/Card';
 import { AppHeader } from '../components/ui/AppHeader';
 import { PrimaryButton } from '../components/ui/PrimaryButton';
 import { SafeIcon } from '../components/ui/SafeIcon';
-import { AuthService } from '../services/AuthService';
+import { SimpleAuthService } from '../services/SimpleAuthService';
+import { User } from '../core/models';
 
 interface Props {
-  onSignedIn: () => void;
+  onSignedIn: (user: User) => void;
 }
 
 export const AuthScreen: React.FC<Props> = ({ onSignedIn }) => {
@@ -17,7 +18,7 @@ export const AuthScreen: React.FC<Props> = ({ onSignedIn }) => {
   const { setCurrentUser } = useAppStore();
   const [isLoading, setIsLoading] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
-  const authService = AuthService.getInstance();
+  const authService = SimpleAuthService.getInstance();
 
   useEffect(() => {
     initializeAuth();
@@ -45,10 +46,10 @@ export const AuthScreen: React.FC<Props> = ({ onSignedIn }) => {
     try {
       const user = await authService.signInWithGoogle();
       setCurrentUser(user);
-      onSignedIn();
+      onSignedIn(user);
     } catch (error: any) {
       console.error('Google sign-in error:', error);
-      Alert.alert('Sign-in Failed', error.message || 'Unable to sign in with Google. Please try again.');
+      Alert.alert('Sign-in Failed', error.message || 'Unable to sign in. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -59,7 +60,7 @@ export const AuthScreen: React.FC<Props> = ({ onSignedIn }) => {
     try {
       const user = await authService.signInWithVipps();
       setCurrentUser(user);
-      onSignedIn();
+      onSignedIn(user);
     } catch (error: any) {
       console.error('Vipps sign-in error:', error);
       Alert.alert('Sign-in Failed', error.message || 'Unable to sign in with Vipps. Please try again.');
@@ -101,7 +102,7 @@ export const AuthScreen: React.FC<Props> = ({ onSignedIn }) => {
             title="Continue with Google"
             onPress={handleGoogleSignIn}
             loading={isLoading}
-            style={styles.signInButton}
+            style={[styles.signInButton, styles.googleButton]}
             icon={<SafeIcon name="google" size={20} color="#fff" />}
           />
 
@@ -173,6 +174,9 @@ const styles = StyleSheet.create({
   },
   signInButton: {
     marginBottom: 12,
+  },
+  googleButton: {
+    backgroundColor: '#4285F4',
   },
   vippsButton: {
     backgroundColor: '#5B2C6F',

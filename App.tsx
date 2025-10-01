@@ -22,6 +22,7 @@ import { CabinSettingsScreen } from './src/screens/CabinSettingsScreen';
 import { UserProfileScreen } from './src/screens/UserProfileScreen';
 import { useAppStore } from './src/stores/appStore';
 import { NotificationService } from './src/services/NotificationService';
+import { SimpleAuthService } from './src/services/SimpleAuthService';
 import { useEffect } from 'react';
 import { SafeIcon } from './src/components/ui/SafeIcon';
 import { Toast } from './src/components/ui/Toast';
@@ -48,12 +49,39 @@ function AppContent() {
   const [tab, setTab] = useState<'logbook' | 'tasks' | 'calendar' | 'cabin' | 'profile'>('logbook');
   const [userId, setUserId] = useState<string | null>(null);
   const [cabinId, setCabinId] = useState<string | null>(null);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const { setCurrentUser, setSelectedCabin } = useAppStore();
   const { toast, hideToast } = useToast();
+  const authService = SimpleAuthService.getInstance();
 
   useEffect(() => {
     NotificationService.initialize();
+    checkAuthStatus();
   }, []);
+
+  const checkAuthStatus = async () => {
+    try {
+      const user = await authService.getCurrentUser();
+      if (user) {
+        setUserId(user.id);
+        setCurrentUser(user);
+      }
+    } catch (error) {
+      console.error('Auth check failed:', error);
+    } finally {
+      setIsCheckingAuth(false);
+    }
+  };
+
+  if (isCheckingAuth) {
+    return (
+      <ServiceProvider>
+        <View style={styles.loadingContainer}>
+          <Text>Loading...</Text>
+        </View>
+      </ServiceProvider>
+    );
+  }
 
   if (!hasOnboarded) {
     return (
@@ -66,9 +94,9 @@ function AppContent() {
   if (!userId) {
     return (
       <ServiceProvider>
-        <AuthScreen onSignedIn={() => {
-          setUserId('demo');
-          setCurrentUser({ id: 'demo', displayName: 'Demo User' });
+        <AuthScreen onSignedIn={(user) => {
+          setUserId(user.id);
+          setCurrentUser(user);
         }} />
       </ServiceProvider>
     );
@@ -137,6 +165,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f9fa',
   },
   content: { flex: 1 },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f8f9fa',
+  },
   tabBar: { 
     flexDirection: 'row', 
     borderTopWidth: 1, 
