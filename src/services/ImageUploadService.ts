@@ -35,6 +35,7 @@ export class ImageUploadService {
         });
 
       if (error) {
+        console.error('Storage upload error:', error);
         throw new Error(`Upload failed: ${error.message}`);
       }
 

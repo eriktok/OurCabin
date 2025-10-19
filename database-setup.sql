@@ -1,42 +1,10 @@
-# Supabase Setup Guide
+-- OurCabin Database Schema Setup
+-- Run this in your Supabase SQL Editor
 
-This guide will help you set up a real Supabase backend for the OurCabin app.
+-- =============================================================================
+-- 1. CREATE TABLES
+-- =============================================================================
 
-## 1. Create Supabase Project
-
-### Step-by-Step Guide
-
-1. **Sign up/Login**: Go to [supabase.com](https://supabase.com) and sign up or sign in
-2. **Create New Project**: Click "New Project" button
-3. **Choose Organization**: Select your organization (or create one if needed)
-4. **Project Details**:
-   - **Name**: `ourcabin` (or `ourcabin-dev` for development)
-   - **Database Password**: Generate a strong password (save this securely!)
-   - **Region**: Choose the region closest to your users
-5. **Create Project**: Click "Create new project"
-6. **Wait for Setup**: The project will take 1-2 minutes to set up
-
-### Get Your Credentials
-
-Once your project is ready:
-
-1. Go to **Settings** → **API** in your Supabase dashboard
-2. Copy the following values:
-   - **Project URL** (looks like: `https://abcdefgh.supabase.co`)
-   - **anon/public key** (starts with `eyJ...`)
-   - **service_role key** (starts with `eyJ...`) - Keep this secret!
-
-3. Update your `.env` file with these values:
-   ```bash
-   SUPABASE_URL=https://your-actual-project-id.supabase.co
-   SUPABASE_ANON_KEY=your-actual-anon-key
-   ```
-
-## 2. Database Schema
-
-Run these SQL commands in your Supabase SQL editor:
-
-```sql
 -- Create users table (references auth.users but doesn't modify it)
 CREATE TABLE public.users (
   id UUID REFERENCES auth.users(id) PRIMARY KEY,
@@ -97,7 +65,10 @@ CREATE TABLE public.comments (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Enable RLS on all tables
+-- =============================================================================
+-- 2. ENABLE ROW LEVEL SECURITY
+-- =============================================================================
+
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.cabins ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.posts ENABLE ROW LEVEL SECURITY;
@@ -105,30 +76,36 @@ ALTER TABLE public.tasks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.bookings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.comments ENABLE ROW LEVEL SECURITY;
 
--- Create RLS policies
--- Users can read their own data
+-- =============================================================================
+-- 3. CREATE RLS POLICIES
+-- =============================================================================
+
+-- Users policies
 CREATE POLICY "Users can read own data" ON public.users
   FOR SELECT USING (auth.uid() = id);
 
--- Users can update their own data
 CREATE POLICY "Users can update own data" ON public.users
   FOR UPDATE USING (auth.uid() = id);
 
--- Users can insert their own data
 CREATE POLICY "Users can insert own data" ON public.users
   FOR INSERT WITH CHECK (auth.uid() = id);
 
--- Cabin members can read cabin data
+-- Cabin policies
 CREATE POLICY "Cabin members can read cabin" ON public.cabins
   FOR SELECT USING (
     created_by = auth.uid()
   );
 
--- Cabin creators can insert cabins
 CREATE POLICY "Users can create cabins" ON public.cabins
   FOR INSERT WITH CHECK (auth.uid() = created_by);
 
--- Cabin members can read posts
+CREATE POLICY "Cabin creators can update cabins" ON public.cabins
+  FOR UPDATE USING (auth.uid() = created_by);
+
+CREATE POLICY "Cabin creators can delete cabins" ON public.cabins
+  FOR DELETE USING (auth.uid() = created_by);
+
+-- Posts policies
 CREATE POLICY "Cabin members can read posts" ON public.posts
   FOR SELECT USING (
     cabin_id IN (
@@ -136,13 +113,14 @@ CREATE POLICY "Cabin members can read posts" ON public.posts
     )
   );
 
--- Authenticated users can create posts
 CREATE POLICY "Users can create posts" ON public.posts
   FOR INSERT WITH CHECK (auth.uid() = author_id);
 
--- Authenticated users can update posts
 CREATE POLICY "Users can update own posts" ON public.posts
   FOR UPDATE USING (auth.uid() = author_id);
+
+CREATE POLICY "Users can delete own posts" ON public.posts
+  FOR DELETE USING (auth.uid() = author_id);
 
 -- Tasks policies
 CREATE POLICY "Cabin members can read tasks" ON public.tasks
@@ -161,6 +139,13 @@ CREATE POLICY "Cabin members can create tasks" ON public.tasks
 
 CREATE POLICY "Cabin members can update tasks" ON public.tasks
   FOR UPDATE USING (
+    cabin_id IN (
+      SELECT id FROM public.cabins WHERE created_by = auth.uid()
+    )
+  );
+
+CREATE POLICY "Cabin members can delete tasks" ON public.tasks
+  FOR DELETE USING (
     cabin_id IN (
       SELECT id FROM public.cabins WHERE created_by = auth.uid()
     )
@@ -188,6 +173,9 @@ CREATE POLICY "Cabin creators can update bookings" ON public.bookings
     )
   );
 
+CREATE POLICY "Users can delete own bookings" ON public.bookings
+  FOR DELETE USING (auth.uid() = user_id);
+
 -- Comments policies
 CREATE POLICY "Cabin members can read comments" ON public.comments
   FOR SELECT USING (
@@ -208,7 +196,17 @@ CREATE POLICY "Cabin members can create comments" ON public.comments
     )
   );
 
--- Create function to increment likes
+CREATE POLICY "Users can update own comments" ON public.comments
+  FOR UPDATE USING (auth.uid() = author_id);
+
+CREATE POLICY "Users can delete own comments" ON public.comments
+  FOR DELETE USING (auth.uid() = author_id);
+
+-- =============================================================================
+-- 4. CREATE FUNCTIONS
+-- =============================================================================
+
+-- Function to increment likes
 CREATE OR REPLACE FUNCTION increment_likes(post_id UUID)
 RETURNS VOID AS $$
 BEGIN
@@ -217,66 +215,48 @@ BEGIN
   WHERE id = post_id;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
-```
 
-## 3. Environment Variables
+-- Function to complete a task
+CREATE OR REPLACE FUNCTION complete_task(task_id UUID)
+RETURNS VOID AS $$
+BEGIN
+  UPDATE public.tasks 
+  SET status = 'done', completed_at = NOW()
+  WHERE id = task_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
-### Quick Setup
-Run the setup script to create your environment file:
-```bash
-./setup-supabase.sh
-```
+-- =============================================================================
+-- 5. CREATE INDEXES FOR PERFORMANCE
+-- =============================================================================
 
-### Manual Setup
-Create a `.env` file in your project root with your Supabase credentials:
+-- Indexes for better query performance
+CREATE INDEX idx_posts_cabin_id ON public.posts(cabin_id);
+CREATE INDEX idx_posts_author_id ON public.posts(author_id);
+CREATE INDEX idx_posts_created_at ON public.posts(created_at DESC);
 
-```bash
-# Supabase Configuration
-SUPABASE_URL=https://your-project-id.supabase.co
-SUPABASE_ANON_KEY=your-anon-key-here
+CREATE INDEX idx_tasks_cabin_id ON public.tasks(cabin_id);
+CREATE INDEX idx_tasks_status ON public.tasks(status);
 
-# Optional: For development/testing
-# SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
+CREATE INDEX idx_bookings_cabin_id ON public.bookings(cabin_id);
+CREATE INDEX idx_bookings_user_id ON public.bookings(user_id);
+CREATE INDEX idx_bookings_dates ON public.bookings(start_date, end_date);
 
-# App Configuration
-# GOOGLE_CLIENT_ID=your-google-client-id
-# GOOGLE_CLIENT_SECRET=your-google-client-secret
-```
+CREATE INDEX idx_comments_post_id ON public.comments(post_id);
+CREATE INDEX idx_comments_author_id ON public.comments(author_id);
 
-You can find these values in your Supabase project settings under "API".
+-- =============================================================================
+-- 6. VERIFY SETUP
+-- =============================================================================
 
-### Environment File Security
-- ✅ **DO**: Add `.env` to your `.gitignore` (already done)
-- ✅ **DO**: Use `.env.example` or `.env.template` for sharing required variables
-- ❌ **DON'T**: Commit actual API keys to version control
-- ❌ **DON'T**: Share your service role key with team members
+-- Check that all tables were created
+SELECT table_name 
+FROM information_schema.tables 
+WHERE table_schema = 'public' 
+AND table_name IN ('users', 'cabins', 'posts', 'tasks', 'bookings', 'comments');
 
-## 4. Authentication Setup
-
-1. In your Supabase dashboard, go to Authentication > Providers
-2. Enable Google OAuth:
-   - Add your Google OAuth credentials
-   - Set redirect URL to your app's URL scheme
-3. Configure your app's URL scheme in the redirect URLs
-
-## 5. Storage Setup (Optional)
-
-If you want to store images in Supabase Storage:
-
-1. Go to Storage in your Supabase dashboard
-2. Create a bucket called `cabin-images`
-3. Set up storage policies for authenticated users
-
-## 6. Testing
-
-1. Set your environment variables
-2. Run the app: `npm start`
-3. Test authentication and data operations
-
-## 7. Production Considerations
-
-- Set up proper RLS policies for production
-- Configure CORS settings
-- Set up database backups
-- Monitor usage and performance
-- Set up proper error handling and logging
+-- Check that RLS is enabled
+SELECT schemaname, tablename, rowsecurity 
+FROM pg_tables 
+WHERE schemaname = 'public' 
+AND tablename IN ('users', 'cabins', 'posts', 'tasks', 'bookings', 'comments');
